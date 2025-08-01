@@ -1,22 +1,64 @@
+// Firebaseの初期化設定（あなたのFirebaseコンソールの設定に置き換えてください）
+const firebaseConfig = {
+  apiKey: "AIzaSyAP2qW_nwiBbmrBQvjP6i69udDqpP8tbfM",
+  authDomain: "esstudymanager.firebaseapp.com",
+  projectId: "esstudymanager",
+  storageBucket: "esstudymanager.firebasestorage.app",
+  messagingSenderId: "9424358863",
+  appId: "1:9424358863:web:b1e87b6aad908ed12596ba",
+  measurementId: "G-4QGE07EM22"
+};
+
+// Firebaseサービスの初期化
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('recordForm');
+    // DOM要素の取得
+    const authUI = document.getElementById('auth-ui');
+    const appContent = document.getElementById('app-content');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userNameElement = document.getElementById('userName');
+    const recordForm = document.getElementById('recordForm');
     const recordsList = document.getElementById('recordsList');
+    
+    // 認証プロバイダの準備
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-    // ローカルストレージからデータを読み込む
-    const loadRecords = () => {
-        const records = JSON.parse(localStorage.getItem('studyRecords')) || [];
-        recordsList.innerHTML = ''; // 一度クリア
-        records.forEach(record => {
-            const div = document.createElement('div');
-            div.className = 'record-item';
-            div.textContent = `${record.date}: ${record.subject} - ${record.time}分`;
-            recordsList.appendChild(div);
-        });
-    };
+    // 認証状態の監視
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // ログイン中のユーザーがいる場合
+            authUI.classList.add('hidden');
+            appContent.classList.remove('hidden');
+            userNameElement.textContent = user.displayName;
+            loadRecords(user.uid);
+        } else {
+            // ログイン中のユーザーがいない場合
+            authUI.classList.remove('hidden');
+            appContent.classList.add('hidden');
+            recordsList.innerHTML = ''; // 記録リストをクリア
+        }
+    });
 
-    // フォーム送信時の処理
-    form.addEventListener('submit', (e) => {
+    // ログインボタンのクリックイベント
+    loginBtn.addEventListener('click', () => {
+        auth.signInWithPopup(provider);
+    });
+
+    // ログアウトボタンのクリックイベント
+    logoutBtn.addEventListener('click', () => {
+        auth.signOut();
+    });
+
+    // フォーム送信時の処理（Firestoreへの書き込み）
+    recordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        const user = auth.currentUser;
+        if (!user) return; // ユーザーがログインしていなければ何もしない
 
         const date = document.getElementById('date').value;
         const subject = document.getElementById('subject').value;
@@ -27,14 +69,40 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const newRecord = { date, subject, time };
-        const records = JSON.parse(localStorage.getItem('studyRecords')) || [];
-        records.push(newRecord);
-        localStorage.setItem('studyRecords', JSON.stringify(records));
-
-        form.reset();
-        loadRecords();
+        try {
+            await db.collection('users').doc(user.uid).collection('records').add({
+                date,
+                subject,
+                time,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // 記録日時をサーバー側で自動生成
+            });
+            recordForm.reset();
+            loadRecords(user.uid); // 記録リストを再読み込み
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            alert("データの記録中にエラーが発生しました。");
+        }
     });
 
-    loadRecords(); // ページ読み込み時に記録を表示
+    // 記録をFirestoreから読み込み、表示する関数
+    const loadRecords = async (uid) => {
+        try {
+            recordsList.innerHTML = '読み込み中...';
+            const querySnapshot = await db.collection('users').doc(uid).collection('records')
+                                        .orderBy('date', 'desc')
+                                        .get();
+            
+            recordsList.innerHTML = ''; // リストをクリア
+            querySnapshot.forEach((doc) => {
+                const record = doc.data();
+                const div = document.createElement('div');
+                div.className = 'record-item p-3 border border-gray-200 rounded-md shadow-sm';
+                div.innerHTML = `<p class="text-gray-800"><strong>${record.date}</strong>: ${record.subject} - ${record.time}分</p>`;
+                recordsList.appendChild(div);
+            });
+        } catch (error) {
+            console.error("Error fetching documents: ", error);
+            recordsList.innerHTML = 'データの読み込み中にエラーが発生しました。';
+        }
+    };
 });
