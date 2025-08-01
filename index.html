@@ -5,32 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学習時間記録アプリ</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDKのCDNを追加 -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="app.js" defer></script>
 </head>
-<body>
-    <div class="container">
-        <h1>今日の学習時間を記録する</h1>
-        <form id="recordForm">
-            <label for="date">日付:</label>
-            <input type="date" id="date" required>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-xl">
+        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">学習時間記録アプリ</h1>
+        
+        <!-- ログインUI -->
+        <div id="auth-ui" class="text-center">
+            <button id="loginBtn" class="bg-green-600 text-white font-bold p-3 rounded-md hover:bg-green-700 transition duration-300">Googleでログイン</button>
+        </div>
+        
+        <!-- 記録UI (ログイン後に表示) -->
+        <div id="app-content" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">ようこそ、<span id="userName"></span>さん！</h2>
+                <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
+            </div>
 
-            <label for="subject">教科:</label>
-            <select id="subject" required>
-                <option value="国語">国語</option>
-                <option value="数学">数学</option>
-                <option value="理科">理科</option>
-                <option value="社会">社会</option>
-                <option value="その他">その他</option>
-            </select>
+            <form id="recordForm" class="space-y-4">
+                <div>
+                    <label for="date" class="block text-gray-700 font-semibold mb-1">日付:</label>
+                    <input type="date" id="date" required class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="subject" class="block text-gray-700 font-semibold mb-1">教科:</label>
+                    <select id="subject" required class="w-full p-2 border border-gray-300 rounded-md">
+                        <option value="国語">国語</option>
+                        <option value="数学">数学</option>
+                        <option value="理科">理科</option>
+                        <option value="社会">社会</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="time" class="block text-gray-700 font-semibold mb-1">時間 (分):</label>
+                    <input type="number" id="time" min="1" required class="w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">記録</button>
+            </form>
 
-            <label for="time">時間 (分):</label>
-            <input type="number" id="time" min="1" required>
-
-            <button type="submit">記録</button>
-        </form>
-
-        <h2>記録履歴</h2>
-        <div id="recordsList"></div>
+            <h2 class="text-2xl font-bold mt-8 mb-4 text-center text-gray-800">記録履歴</h2>
+            <div id="recordsList" class="space-y-2"></div>
+        </div>
     </div>
-    <script src="app.js"></script>
 </body>
 </html>
