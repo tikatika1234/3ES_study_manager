@@ -93,6 +93,56 @@ document.addEventListener('DOMContentLoaded', () => {
         auth.signOut();
     });
 
-    // Firestoreの読み込みと書き込みロジックは省略（変更なし）
-    // ...
+   // フォーム送信時の処理（Firestoreへの書き込み）
+    recordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const user = auth.currentUser;
+        if (!user) return; // ユーザーがログインしていなければ何もしない
+
+        const date = document.getElementById('date').value;
+        const subject = document.getElementById('subject').value;
+        const time = parseInt(document.getElementById('time').value, 10);
+
+        if (!date || !subject || isNaN(time) || time <= 0) {
+            alert('すべての項目を正しく入力してください。');
+            return;
+        }
+
+        try {
+            await db.collection('users').doc(user.uid).collection('records').add({
+                date,
+                subject,
+                time,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // 記録日時をサーバー側で自動生成
+            });
+            recordForm.reset();
+            loadRecords(user.uid); // 記録リストを再読み込み
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            alert("データの記録中にエラーが発生しました。");
+        }
+    });
+
+    // 記録をFirestoreから読み込み、表示する関数
+    const loadRecords = async (uid) => {
+        try {
+            recordsList.innerHTML = '読み込み中...';
+            const querySnapshot = await db.collection('users').doc(uid).collection('records')
+                                        .orderBy('date', 'desc')
+                                        .get();
+            
+            recordsList.innerHTML = ''; // リストをクリア
+            querySnapshot.forEach((doc) => {
+                const record = doc.data();
+                const div = document.createElement('div');
+                div.className = 'record-item p-3 border border-gray-200 rounded-md shadow-sm';
+                div.innerHTML = `<p class="text-gray-800"><strong>${record.date}</strong>: ${record.subject} - ${record.time}分</p>`;
+                recordsList.appendChild(div);
+            });
+        } catch (error) {
+            console.error("Error fetching documents: ", error);
+            recordsList.innerHTML = 'データの読み込み中にエラーが発生しました。';
+        }
+    };
 });
