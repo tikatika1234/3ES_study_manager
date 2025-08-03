@@ -3,74 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学習時間記録アプリ</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDKのCDNを追加 -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="app.js" defer></script>
+    <title>学習時間記録アプリ - ホーム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-xl">
-        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">学習時間記録アプリ</h1>
-        
-        <!-- ログインUI -->
-        <div id="auth-ui" class="text-center">
-            
-            <!-- メールアドレスとパスワードのフォーム -->
-            <form id="emailAuthForm" class="space-y-4 mb-4">
-                <div>
-                    <label for="email" class="block text-gray-700 font-semibold mb-1">メールアドレス:</label>
-                    <input type="email" id="email" required class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div>
-                    <label for="password" class="block text-gray-700 font-semibold mb-1">パスワード:</label>
-                    <input type="password" id="password" required class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div class="flex justify-between space-x-2">
-                    <button type="button" id="registerBtn" class="flex-1 bg-gray-500 text-white font-bold p-3 rounded-md hover:bg-gray-600 transition duration-300">新規登録</button>
-                    <button type="button" id="emailLoginBtn" class="flex-1 bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">ログイン</button>
-                </div>
-            </form>
-
-            <div class="my-4">または</div>
-
-            <!-- Googleログインボタン -->
-            <button id="googleLoginBtn" class="w-full bg-green-600 text-white font-bold p-3 rounded-md hover:bg-green-700 transition duration-300">Googleでログイン</button>
-        </div>
-        
-        <!-- 記録UI (ログイン後に表示) -->
-        <div id="app-content" class="hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">ようこそ、<span id="userName"></span>さん！</h2>
-                <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
-            </div>
-            
-            <form id="recordForm" class="space-y-4">
-                <div>
-                    <label for="date" class="block text-gray-700 font-semibold mb-1">日付:</label>
-                    <input type="date" id="date" required class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div>
-                    <label for="subject" class="block text-gray-700 font-semibold mb-1">教科:</label>
-                    <select id="subject" required class="w-full p-2 border border-gray-300 rounded-md">
-                        <option value="国語">国語</option>
-                        <option value="数学">数学</option>
-                        <option value="理科">理科</option>
-                        <option value="社会">社会</option>
-                        <option value="その他">その他</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="time" class="block text-gray-700 font-semibold mb-1">時間 (分):</label>
-                    <input type="number" id="time" min="1" required class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">記録</button>
-            </form>
-            
-            <h2 class="text-2xl font-bold mt-8 mb-4 text-center text-gray-800">記録履歴</h2>
-            <div id="recordsList" class="space-y-2"></div>
+    <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">学習時間記録アプリ</h1>
+        <p class="text-gray-600 mb-8">日々の学習時間を記録して、成果を振り返りましょう。</p>
+        <div class="space-y-4">
+  a          <a href="record.html" class="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition duration-300">学習記録</a>
+            <a href="login.html" class="block w-full bg-green-600 text-white font-bold py-3 px-4 rounded-md hover:bg-green-700 transition duration-300">ログイン</a>
         </div>
     </div>
 </body>
