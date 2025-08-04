@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    <!-- Firebase SDKのCDNを追加 -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="login.js" defer></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">ログイン</h1>
+        
+        <!-- メールアドレスとパスワードのフォーム -->
+        <form id="emailAuthForm" class="space-y-4 mb-4">
+            <div>
+                <input type="email" id="email" placeholder="メールアドレス" required class="w-full p-3 border border-gray-300 rounded-md">
+            </div>
+            <div>
+                <input type="password" id="password" placeholder="パスワード" required class="w-full p-3 border border-gray-300 rounded-md">
+            </div>
+            <div class="flex justify-between space-x-2">
+                <button type="button" id="registerBtn" class="flex-1 bg-gray-500 text-white font-bold p-3 rounded-md hover:bg-gray-600 transition duration-300">新規登録</button>
+                <button type="button" id="emailLoginBtn" class="flex-1 bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">ログイン</button>
+            </div>
+        </form>
+
+        <div class="my-4 text-gray-500">または</div>
+
+        <!-- Googleログインボタン -->
+        <button id="googleLoginBtn" class="w-full bg-green-600 text-white font-bold p-3 rounded-md hover:bg-green-700 transition duration-300">Googleでログイン</button>
+    </div>
+</body>
+</html>
