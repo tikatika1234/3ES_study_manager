@@ -8,7 +8,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
-    <!-- Firebase SDKのCDNを追加 -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -19,7 +18,6 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">学習記録</h1>
             <div class="flex space-x-2">
-                <!-- ホームに戻るボタンを追加 -->
                 <button id="backToHomeBtn" class="bg-gray-300 text-gray-800 font-bold p-2 rounded-md hover:bg-gray-400 transition duration-300">ホーム</button>
                 <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
             </div>
@@ -32,24 +30,47 @@
                 <label for="date" class="block text-gray-700 font-semibold mb-1">日付:</label>
                 <input type="date" id="date" required class="w-full p-3 border border-gray-300 rounded-md">
             </div>
-            <div>
-                <label for="subject" class="block text-gray-700 font-semibold mb-1">教科:</label>
-                <select id="subject" required class="w-full p-3 border border-gray-300 rounded-md">
-                    <option value="国語">国語</option>
-                    <option value="数学">数学</option>
-                    <option value="理科">理科</option>
-                    <option value="社会">社会</option>
-                    <option value="その他">その他</option>
-                </select>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="国語" class="block text-gray-700 font-semibold mb-1">国語 (分):</label>
+                    <input type="number" id="国語" min="0" value="0" class="w-full p-3 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="数学" class="block text-gray-700 font-semibold mb-1">数学 (分):</label>
+                    <input type="number" id="数学" min="0" value="0" class="w-full p-3 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="理科" class="block text-gray-700 font-semibold mb-1">理科 (分):</label>
+                    <input type="number" id="理科" min="0" value="0" class="w-full p-3 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="社会" class="block text-gray-700 font-semibold mb-1">社会 (分):</label>
+                    <input type="number" id="社会" min="0" value="0" class="w-full p-3 border border-gray-300 rounded-md">
+                </div>
+                <div class="col-span-2">
+                    <label for="その他" class="block text-gray-700 font-semibold mb-1">その他 (分):</label>
+                    <input type="number" id="その他" min="0" value="0" class="w-full p-3 border border-gray-300 rounded-md">
+                </div>
             </div>
-            <div>
-                <label for="time" class="block text-gray-700 font-semibold mb-1">時間 (分):</label>
-                <input type="number" id="time" min="1" required class="w-full p-3 border border-gray-300 rounded-md">
-            </div>
+
             <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">記録</button>
         </form>
 
-        <h2 class="text-2xl font-bold mt-8 mb-4 text-center text-gray-800">記録履歴</h2>
+        <h2 class="text-2xl font-bold mt-8 mb-4 text-center text-gray-800">今週の目標と振り返り</h2>
+        <form id="weeklySummaryForm" class="space-y-4 mb-8">
+            <div>
+                <label for="weeklyGoal" class="block text-gray-700 font-semibold mb-1">今週の目標:</label>
+                <textarea id="weeklyGoal" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="今週の学習目標を書きましょう"></textarea>
+            </div>
+            <div>
+                <label for="weeklyReflection" class="block text-gray-700 font-semibold mb-1">今週の振り返り:</label>
+                <textarea id="weeklyReflection" rows="4" class="w-full p-3 border border-gray-300 rounded-md" placeholder="今週の学習を振り返りましょう"></textarea>
+            </div>
+            <button type="submit" id="saveWeeklySummaryBtn" class="w-full bg-purple-600 text-white font-bold p-3 rounded-md hover:bg-purple-700 transition duration-300">目標と振り返りを保存</button>
+        </form>
+
+        <h2 class="text-2xl font-bold mt-8 mb-4 text-center text-gray-800">記録履歴 (週ごと)</h2>
         <div id="recordsList" class="space-y-2"></div>
     </div>
 </body>
