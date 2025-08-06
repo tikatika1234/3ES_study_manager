@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerBtn = document.getElementById('registerBtn');
     const emailLoginBtn = document.getElementById('emailLoginBtn');
     const googleLoginBtn = document.getElementById('googleLoginBtn');
+    const backToHomeBtn = document.getElementById('backToHomeBtn'); // 追加
 
     // 認証状態の監視
     auth.onAuthStateChanged(user => {
@@ -67,5 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch((error) => {
         console.error("Googleログインエラー: ", error);
         // エラーをユーザーに表示しない
+    });
+
+    // ホームに戻るボタンのイベントリスナーを追加
+    backToHomeBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
     });
 });
