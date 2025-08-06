@@ -18,7 +18,11 @@
     <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-xl mx-auto">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">学習記録</h1>
-            <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
+            <div class="flex space-x-2">
+                <!-- ホームに戻るボタンを追加 -->
+                <button id="backToHomeBtn" class="bg-gray-300 text-gray-800 font-bold p-2 rounded-md hover:bg-gray-400 transition duration-300">ホーム</button>
+                <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
+            </div>
         </div>
 
         <h2 class="text-xl font-semibold mb-4">ようこそ、<span id="userName"></span>さん！</h2>
