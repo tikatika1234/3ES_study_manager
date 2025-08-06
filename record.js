@@ -15,6 +15,7 @@ const db = firebase.firestore();
 document.addEventListener('DOMContentLoaded', () => {
     // DOM要素を取得
     const logoutBtn = document.getElementById('logoutBtn');
+    const backToHomeBtn = document.getElementById('backToHomeBtn'); // 追加
     const userNameElement = document.getElementById('userName');
     const recordForm = document.getElementById('recordForm');
     const recordsList = document.getElementById('recordsList');
@@ -89,6 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // ログアウト成功後、ログインページに遷移
             window.location.href = 'login.html';
         });
+    });
+
+    // ホームに戻るボタンのイベントリスナーを追加
+    backToHomeBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
     });
 
     // 現在の日付をフォームに自動入力
