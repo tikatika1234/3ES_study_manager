@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signupForm');
     const showSignupBtn = document.getElementById('showSignup');
     const showLoginBtn = document.getElementById('showLogin');
+    
+    // ログインフォームの入力要素もIDで取得
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+
+    // 新規登録フォームの入力要素もIDで取得
+    const signupEmailInput = document.getElementById('signup-email');
+    const signupPasswordInput = document.getElementById('signup-password');
+    const signupDisplayNameInput = document.getElementById('signup-displayName');
+
 
     // 認証状態の変更を監視するリスナー
     auth.onAuthStateChanged(async user => {
@@ -73,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', async (e) => {
             console.log("loginForm: フォームが送信されました。");
             e.preventDefault();
-            const email = loginForm.email.value;
-            const password = loginForm.password.value;
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
             try {
                 console.log("ログイン処理を開始します...");
                 await auth.signInWithEmailAndPassword(email, password);
@@ -92,9 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
         signupForm.addEventListener('submit', async (e) => {
             console.log("signupForm: フォームが送信されました。");
             e.preventDefault();
-            const email = signupForm.email.value;
-            const password = signupForm.password.value;
-            const displayName = signupForm.displayName.value;
+            
+            // ⭐︎ 修正箇所: IDを使って値を取得するように変更
+            const email = signupEmailInput.value;
+            const password = signupPasswordInput.value;
+            const displayName = signupDisplayNameInput.value;
+
             try {
                 console.log("新規ユーザー作成処理を開始します...");
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
