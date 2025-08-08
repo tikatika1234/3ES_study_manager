@@ -7,7 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
+        /* 手書きキャンバスのスタイル */
+        #signatureCanvas {
+            border: 1px solid #e5e7eb;
+            background-color: #ffffff;
+            cursor: crosshair;
+        }
+        #signatureCanvas.hidden {
+            display: none;
+        }
     </style>
+    <!-- Firebase SDKのCDNを追加 -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -18,6 +28,7 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">学習記録</h1>
             <div class="flex space-x-2">
+                <!-- ホームに戻るボタンを追加 -->
                 <button id="backToHomeBtn" class="bg-gray-300 text-gray-800 font-bold p-2 rounded-md hover:bg-gray-400 transition duration-300">ホーム</button>
                 <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
             </div>
@@ -31,6 +42,7 @@
                 <input type="date" id="date" required class="w-full p-3 border border-gray-300 rounded-md">
             </div>
 
+            <!-- 各教科の入力欄 -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="国語" class="block text-gray-700 font-semibold mb-1">国語 (分):</label>
@@ -54,9 +66,32 @@
                 </div>
             </div>
 
+            <!-- 一日の感想入力セクション -->
+            <div class="mt-4">
+                <label class="block text-gray-700 font-semibold mb-2">一日の感想:</label>
+                <div class="flex space-x-4 mb-2">
+                    <label class="flex items-center">
+                        <input type="radio" name="commentType" value="text" checked class="form-radio">
+                        <span class="ml-2 text-gray-700">文字入力</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="commentType" value="signature" class="form-radio">
+                        <span class="ml-2 text-gray-700">手書き</span>
+                    </label>
+                </div>
+                <textarea id="dailyCommentText" rows="3" class="w-full p-3 border border-gray-300 rounded-md"></textarea>
+                <div id="signatureSection" class="hidden">
+                    <canvas id="signatureCanvas" width="450" height="150" class="w-full h-auto rounded-md"></canvas>
+                    <div class="flex space-x-2 mt-2">
+                        <button type="button" id="clearCanvasBtn" class="flex-1 bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">クリア</button>
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">記録</button>
         </form>
 
+        <!-- 週ごとの目標と振り返り入力フォーム -->
         <h2 class="text-2xl font-bold mt-8 mb-4 text-center text-gray-800">今週の目標と振り返り</h2>
         <form id="weeklySummaryForm" class="space-y-4 mb-8">
             <div>
