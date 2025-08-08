@@ -27,6 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const weeklyReflectionInput = document.getElementById('weeklyReflection');
     const saveWeeklySummaryBtn = document.getElementById('saveWeeklySummaryBtn');
 
+    // 日々の感想入力用のDOM要素
+    const commentTypeRadios = document.querySelectorAll('input[name="commentType"]');
+    const dailyCommentTextarea = document.getElementById('dailyCommentText');
+    const signatureSection = document.getElementById('signatureSection');
+    const signatureCanvas = document.getElementById('signatureCanvas');
+    const clearCanvasBtn = document.getElementById('clearCanvasBtn');
+    const ctx = signatureCanvas.getContext('2d');
+
+    // 手書き機能の状態変数
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
     // 教科のリスト
     const subjects = ['国語', '数学', '理科', '社会', 'その他'];
 
@@ -59,7 +72,70 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'login.html';
         }
     });
+    
+    // 日々の感想入力タイプを切り替えるイベントリスナー
+    commentTypeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'text') {
+                dailyCommentTextarea.classList.remove('hidden');
+                signatureSection.classList.add('hidden');
+            } else {
+                dailyCommentTextarea.classList.add('hidden');
+                signatureSection.classList.remove('hidden');
+            }
+        });
+    });
 
+    // 手書きキャンバスの描画機能
+    function draw(e) {
+        if (!isDrawing) return;
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        const rect = signatureCanvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left) * (signatureCanvas.width / rect.width);
+        const mouseY = (e.clientY - rect.top) * (signatureCanvas.height / rect.height);
+        ctx.lineTo(mouseX, mouseY);
+        ctx.stroke();
+        [lastX, lastY] = [mouseX, mouseY];
+    }
+    
+    // マウスイベントとタッチイベントの両方に対応
+    signatureCanvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const rect = signatureCanvas.getBoundingClientRect();
+        [lastX, lastY] = [(e.clientX - rect.left) * (signatureCanvas.width / rect.width), (e.clientY - rect.top) * (signatureCanvas.height / rect.height)];
+    });
+    signatureCanvas.addEventListener('mousemove', draw);
+    signatureCanvas.addEventListener('mouseup', () => isDrawing = false);
+    signatureCanvas.addEventListener('mouseout', () => isDrawing = false);
+
+    signatureCanvas.addEventListener('touchstart', (e) => {
+        isDrawing = true;
+        const rect = signatureCanvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        [lastX, lastY] = [(touch.clientX - rect.left) * (signatureCanvas.width / rect.width), (touch.clientY - rect.top) * (signatureCanvas.height / rect.height)];
+        e.preventDefault(); // スクロール防止
+    });
+    signatureCanvas.addEventListener('touchmove', (e) => {
+        if (!isDrawing) return;
+        const rect = signatureCanvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const mouseX = (touch.clientX - rect.left) * (signatureCanvas.width / rect.width);
+        const mouseY = (touch.clientY - rect.top) * (signatureCanvas.height / rect.height);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(mouseX, mouseY);
+        ctx.stroke();
+        [lastX, lastY] = [mouseX, mouseY];
+        e.preventDefault(); // スクロール防止
+    });
+    signatureCanvas.addEventListener('touchend', () => isDrawing = false);
+
+    // キャンバスクリアボタン
+    clearCanvasBtn.addEventListener('click', () => {
+        ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    });
+    
     // フォーム送信時の処理（Firestoreへの書き込み）
     recordForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -93,8 +169,24 @@ document.addEventListener('DOMContentLoaded', () => {
             totalTimeForDay += time;
         });
 
-        if (totalTimeForDay === 0) {
-            alert('いずれかの教科に0分より大きい時間を入力してください。');
+        const commentType = document.querySelector('input[name="commentType"]:checked').value;
+        let dailyComment = '';
+        if (commentType === 'text') {
+            dailyComment = dailyCommentTextarea.value;
+        } else {
+            // 手書きデータをBase64として保存
+            dailyComment = signatureCanvas.toDataURL();
+            // データが空白（何も描画されていない）の場合は保存しない
+            if (dailyComment === 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcAAAACTCAYAAADy8/0kAAAAAXNSR0IArs4c6QAAAXRJREFUeJztwTEBAAAAw6D5U4e+hWAAAAAAAAAAAAAAGA+D5VAAAAAAAAAAAAAAABAADwQYAAAAAAAAAAAAAAYD4AAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' || !dailyComment) {
+                 dailyComment = '';
+            }
+        }
+        
+        dailyRecord.commentType = commentType;
+        dailyRecord.comment = dailyComment;
+
+        if (totalTimeForDay === 0 && dailyComment === '') {
+            alert('いずれかの教科に0分より大きい時間を入力するか、一日の感想を入力してください。');
             return;
         }
 
@@ -108,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             subjects.forEach(subject => {
                 document.getElementById(subject).value = 0; // 各教科の時間を0にリセット
             });
+            clearCanvasBtn.click(); // キャンバスをクリア
             loadWeeklyRecords(user.uid); // 週ごとの記録リストを再読み込み
         } catch (error) {
             console.error("Error adding/updating document: ", error);
@@ -233,6 +326,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                 dailyTotal += time;
                             }
                         });
+
+                        // 感想の表示
+                        let commentHtml = '';
+                        if (record.comment) {
+                            if (record.commentType === 'text') {
+                                commentHtml = `<p class="text-sm text-gray-600 mt-2"><strong>感想:</strong> ${record.comment}</p>`;
+                            } else if (record.commentType === 'signature') {
+                                commentHtml = `<div class="mt-2">
+                                                    <p class="text-sm text-gray-600 mb-1"><strong>感想（手書き）:</strong></p>
+                                                    <img src="${record.comment}" alt="Daily Signature" class="w-full h-auto border border-gray-200 rounded-md bg-white">
+                                               </div>`;
+                            }
+                        }
+
                         weekHtml += `
                             <div class="record-item p-3 border border-gray-200 rounded-md shadow-sm">
                                 <p class="text-gray-800 font-bold mb-1">${record.date}</p>
@@ -240,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ${subjectsHtml}
                                 </ul>
                                 <p class="text-right text-gray-900 font-semibold mt-2">合計: ${dailyTotal}分</p>
+                                ${commentHtml}
                             </div>
                         `;
                     });
