@@ -15,7 +15,11 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+console.log("login.js: スクリプトが読み込まれました。");
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded: DOMの読み込みが完了しました。");
+
     // 必要なDOM要素を取得
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
@@ -23,42 +27,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const showLoginBtn = document.getElementById('showLogin');
 
     // 認証状態の変更を監視するリスナー
-    // ログイン状態が変わるたびに、この関数が実行されます
     auth.onAuthStateChanged(async user => {
         if (user) {
-            // ユーザーがログイン済みの場合、役割をチェックしてリダイレクト
+            console.log("onAuthStateChanged: ユーザーがログインしています。UID:", user.uid);
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
                     const userData = userDoc.data();
                     if (userData.role === 'teacher') {
-                        // 役割が'teacher'なら教師用ページへ
+                        console.log("onAuthStateChanged: 役割は'teacher'です。teacher.htmlにリダイレクトします。");
                         window.location.href = 'teacher.html';
                     } else {
-                        // それ以外（'student'）なら生徒用ページへ
+                        console.log("onAuthStateChanged: 役割は'student'です。record.htmlにリダイレクトします。");
                         window.location.href = 'record.html';
                     }
                 } else {
-                    // Firestoreにドキュメントが存在しない場合は、念のため生徒として扱う
-                    console.warn("Firestoreのユーザーデータが見つかりませんでした。生徒としてリダイレクトします。");
+                    console.warn("onAuthStateChanged: Firestoreにユーザーデータが見つかりませんでした。生徒として扱います。");
                     window.location.href = 'record.html';
                 }
             } catch (error) {
-                console.error("ユーザー役割のチェック中にエラーが発生しました:", error);
-                // エラーが発生しても、生徒用ページにリダイレクトしてアプリの継続を試みる
+                console.error("onAuthStateChanged: ユーザー役割のチェック中にエラーが発生しました:", error);
                 window.location.href = 'record.html';
             }
+        } else {
+            console.log("onAuthStateChanged: ユーザーはログアウトしています。");
         }
-        // ユーザーがログアウト済みの場合は何もしません
     });
 
     // ログインフォームと新規登録フォームの表示を切り替える
     if (showSignupBtn && showLoginBtn && loginForm && signupForm) {
         showSignupBtn.addEventListener('click', () => {
+            console.log("showSignupボタンがクリックされました。新規登録フォームを表示します。");
             loginForm.classList.add('hidden');
             signupForm.classList.remove('hidden');
         });
         showLoginBtn.addEventListener('click', () => {
+            console.log("showLoginボタンがクリックされました。ログインフォームを表示します。");
             signupForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
         });
@@ -67,16 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ログインフォームの送信処理
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
+            console.log("loginForm: フォームが送信されました。");
             e.preventDefault();
             const email = loginForm.email.value;
             const password = loginForm.password.value;
             try {
-                // メールアドレスとパスワードでログインを試みる
+                console.log("ログイン処理を開始します...");
                 await auth.signInWithEmailAndPassword(email, password);
-                // 成功すると、上記の onAuthStateChanged リスナーが自動的にリダイレクト処理を実行します
-                console.log("ログイン成功");
+                console.log("ログイン成功！onAuthStateChangedリスナーがリダイレクトを処理します。");
             } catch (error) {
-                // ログイン失敗時にエラーメッセージを表示
                 alert(`ログインエラー: ${error.message}`);
                 console.error("ログインエラー:", error);
             }
@@ -85,20 +88,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 新規登録フォームの送信処理
     if (signupForm) {
+        console.log("signupForm: イベントリスナーをセットアップします。");
         signupForm.addEventListener('submit', async (e) => {
+            console.log("signupForm: フォームが送信されました。");
             e.preventDefault();
             const email = signupForm.email.value;
             const password = signupForm.password.value;
             const displayName = signupForm.displayName.value;
             try {
-                // 新しいユーザーを認証システムに作成
+                console.log("新規ユーザー作成処理を開始します...");
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
-                // ユーザーの表示名を設定
+                console.log("Firebase Authenticationでユーザーを作成しました。UID:", user.uid);
                 await user.updateProfile({ displayName: displayName });
                 
-                // Firestoreにユーザーのドキュメントを作成し、役割を'student'に設定
+                console.log("Firestoreにユーザーデータを保存します。");
                 await db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: displayName,
@@ -111,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loginForm && signupForm) {
                      signupForm.classList.add('hidden');
                      loginForm.classList.remove('hidden');
+                     console.log("新規登録後にログインフォームに戻りました。");
                 }
             } catch (error) {
                 alert(`登録エラー: ${error.message}`);
