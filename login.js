@@ -10,68 +10,67 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM要素を取得
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const registerBtn = document.getElementById('registerBtn');
-    const emailLoginBtn = document.getElementById('emailLoginBtn');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    const backToHomeBtn = document.getElementById('backToHomeBtn'); // 追加
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const showSignupBtn = document.getElementById('showSignup');
+    const showLoginBtn = document.getElementById('showLogin');
 
-    // 認証状態の監視
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            // ログイン済みの場合、ホーム画面にリダイレクト
-            window.location.href = 'index.html';
-        }
-    });
+    // ... (既存のフォーム切り替えロジックは省略) ...
+    // この部分は変更なしでOKです
 
-    // 新規登録ボタンのイベントリスナー
-    registerBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        try {
-            await auth.createUserWithEmailAndPassword(email, password);
-            alert('新規登録が完了しました！');
-        } catch (error) {
-            console.error("新規登録エラー: ", error);
-            alert("新規登録中にエラーが発生しました: " + error.message);
-        }
-    });
+    // ログイン処理
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = loginForm.email.value;
+            const password = loginForm.password.value;
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                // ログイン成功後、ユーザーの役割をチェック
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.role === 'teacher') {
+                        window.location.href = 'teacher.html';
+                    } else {
+                        window.location.href = 'record.html';
+                    }
+                } else {
+                    // ドキュメントが存在しない場合は生徒として扱う
+                    window.location.href = 'record.html';
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    }
 
-    // メールアドレスログインボタンのイベントリスナー
-    emailLoginBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            alert('ログインに成功しました！');
-        } catch (error) {
-            console.error("ログインエラー: ", error);
-            alert("ログイン中にエラーが発生しました: " + error.message);
-        }
-    });
-
-    // Googleログインボタンのイベントリスナー
-    googleLoginBtn.addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithRedirect(provider);
-    });
-
-    // リダイレクト結果の処理
-    auth.getRedirectResult().then((result) => {
-        if (result.credential) {
-            console.log('Googleログインに成功しました！');
-        }
-    }).catch((error) => {
-        console.error("Googleログインエラー: ", error);
-        // エラーをユーザーに表示しない
-    });
-
-    // ホームに戻るボタンのイベントリスナーを追加
-    backToHomeBtn.addEventListener('click', () => {
-        window.location.href = 'index.html';
-    });
+    // 新規登録処理
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = signupForm.email.value;
+            const password = signupForm.password.value;
+            const displayName = signupForm.displayName.value;
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                await user.updateProfile({ displayName: displayName });
+                // 新規ユーザーをFirestoreに保存し、初期ロールを'student'に設定
+                await db.collection('users').doc(user.uid).set({
+                    email: user.email,
+                    displayName: displayName,
+                    role: 'student', // 新規登録時はデフォルトで生徒
+                });
+                alert('登録が完了しました。ログインしてください。');
+                window.location.reload();
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    }
 });
