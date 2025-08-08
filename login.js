@@ -25,6 +25,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+        // 新規登録ボタンのイベントリスナー
+    registerBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        try {
+            await auth.createUserWithEmailAndPassword(email, password);
+            alert('新規登録が完了しました！');
+        } catch (error) {
+            console.error("新規登録エラー: ", error);
+            alert("新規登録中にエラーが発生しました: " + error.message);
+        }
+    });
+
+    // メールアドレスログインボタンのイベントリスナー
+    emailLoginBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            alert('ログインに成功しました！');
+        } catch (error) {
+            console.error("ログインエラー: ", error);
+            alert("ログイン中にエラーが発生しました: " + error.message);
+        }
+    });
+
+
     // ログイン処理
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
