@@ -61,8 +61,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 認証状態の監視
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async user => {
         if (user) {
+            // ユーザーの役割をチェック
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            const userData = userDoc.data();
+            if (!userData || userData.role !== 'student') {
+                alert('このページは生徒専用です。');
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
+                return;
+            }
+
             // ログイン済みの場合
             userNameElement.textContent = user.displayName || user.email;
             loadWeeklyRecords(user.uid); // 週ごとの記録を読み込む
@@ -327,18 +338,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         });
 
-                        // 感想の表示
-                        let commentHtml = '';
+                        // 生徒の感想を表示
+                        let studentCommentHtml = '';
                         if (record.comment) {
                             if (record.commentType === 'text') {
-                                commentHtml = `<p class="text-sm text-gray-600 mt-2"><strong>感想:</strong> ${record.comment}</p>`;
+                                studentCommentHtml = `<p class="text-sm text-gray-600 mt-2"><strong>感想:</strong> ${record.comment}</p>`;
                             } else if (record.commentType === 'signature') {
-                                commentHtml = `<div class="mt-2">
+                                studentCommentHtml = `<div class="mt-2">
                                                     <p class="text-sm text-gray-600 mb-1"><strong>感想（手書き）:</strong></p>
                                                     <img src="${record.comment}" alt="Daily Signature" class="w-full h-auto border border-gray-200 rounded-md bg-white">
                                                </div>`;
                             }
                         }
+
+                        // 教師のコメントを表示
+                        let teacherCommentHtml = '';
+                        if (record.teacherComment) {
+                            teacherCommentHtml = `<div class="mt-2 p-2 bg-gray-100 rounded-md">
+                                                     <p class="text-sm font-semibold text-gray-800">先生からのコメント:</p>
+                                                     <p class="text-sm text-gray-700 whitespace-pre-wrap">${record.teacherComment}</p>
+                                                  </div>`;
+                        }
+
 
                         weekHtml += `
                             <div class="record-item p-3 border border-gray-200 rounded-md shadow-sm">
@@ -347,7 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ${subjectsHtml}
                                 </ul>
                                 <p class="text-right text-gray-900 font-semibold mt-2">合計: ${dailyTotal}分</p>
-                                ${commentHtml}
+                                ${studentCommentHtml}
+                                ${teacherCommentHtml}
                             </div>
                         `;
                     });
