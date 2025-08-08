@@ -1,86 +1,89 @@
-// Firebaseの初期化設定（あなたのFirebaseコンソールの設定に置き換えてください）
+// Firebaseの初期化設定
+// ⭐︎この部分を、あなたのFirebaseプロジェクトの設定に必ず置き換えてください。
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAP2qW_nwiBbmrBQvjP6i69udDqpP8tbfM",
+  authDomain: "esstudymanager.firebaseapp.com",
+  projectId: "esstudymanager",
+  storageBucket: "esstudymanager.firebasestorage.app",
+  messagingSenderId: "9424358863",
+  appId: "1:9424358863:web:b1e87b6aad908ed12596ba",
+  measurementId: "G-4QGE07EM22"
 };
+
+// Firebaseのサービスを初期化
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 必要なDOM要素を取得
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const showSignupBtn = document.getElementById('showSignup');
     const showLoginBtn = document.getElementById('showLogin');
 
-    // 認証状態の監視
-    auth.onAuthStateChanged(user => {
+    // 認証状態の変更を監視するリスナー
+    // ログイン状態が変わるたびに、この関数が実行されます
+    auth.onAuthStateChanged(async user => {
         if (user) {
-            // ログイン済みの場合、ホーム画面にリダイレクト
-            window.location.href = 'index.html';
+            // ユーザーがログイン済みの場合、役割をチェックしてリダイレクト
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData.role === 'teacher') {
+                        // 役割が'teacher'なら教師用ページへ
+                        window.location.href = 'teacher.html';
+                    } else {
+                        // それ以外（'student'）なら生徒用ページへ
+                        window.location.href = 'record.html';
+                    }
+                } else {
+                    // Firestoreにドキュメントが存在しない場合は、念のため生徒として扱う
+                    console.warn("Firestoreのユーザーデータが見つかりませんでした。生徒としてリダイレクトします。");
+                    window.location.href = 'record.html';
+                }
+            } catch (error) {
+                console.error("ユーザー役割のチェック中にエラーが発生しました:", error);
+                // エラーが発生しても、生徒用ページにリダイレクトしてアプリの継続を試みる
+                window.location.href = 'record.html';
+            }
         }
+        // ユーザーがログアウト済みの場合は何もしません
     });
 
-        // 新規登録ボタンのイベントリスナー
-    registerBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        try {
-            await auth.createUserWithEmailAndPassword(email, password);
-            alert('新規登録が完了しました！');
-        } catch (error) {
-            console.error("新規登録エラー: ", error);
-            alert("新規登録中にエラーが発生しました: " + error.message);
-        }
-    });
+    // ログインフォームと新規登録フォームの表示を切り替える
+    if (showSignupBtn && showLoginBtn && loginForm && signupForm) {
+        showSignupBtn.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+        });
+        showLoginBtn.addEventListener('click', () => {
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+    }
 
-    // メールアドレスログインボタンのイベントリスナー
-    emailLoginBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            alert('ログインに成功しました！');
-        } catch (error) {
-            console.error("ログインエラー: ", error);
-            alert("ログイン中にエラーが発生しました: " + error.message);
-        }
-    });
-
-
-    // ログイン処理
+    // ログインフォームの送信処理
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = loginForm.email.value;
             const password = loginForm.password.value;
             try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                // ログイン成功後、ユーザーの役割をチェック
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    if (userData.role === 'teacher') {
-                        window.location.href = 'teacher.html';
-                    } else {
-                        window.location.href = 'record.html';
-                    }
-                } else {
-                    // ドキュメントが存在しない場合は生徒として扱う
-                    window.location.href = 'record.html';
-                }
+                // メールアドレスとパスワードでログインを試みる
+                await auth.signInWithEmailAndPassword(email, password);
+                // 成功すると、上記の onAuthStateChanged リスナーが自動的にリダイレクト処理を実行します
+                console.log("ログイン成功");
             } catch (error) {
-                alert(error.message);
+                // ログイン失敗時にエラーメッセージを表示
+                alert(`ログインエラー: ${error.message}`);
+                console.error("ログインエラー:", error);
             }
         });
     }
 
-    // 新規登録処理
+    // 新規登録フォームの送信処理
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -88,19 +91,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = signupForm.password.value;
             const displayName = signupForm.displayName.value;
             try {
+                // 新しいユーザーを認証システムに作成
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
+                
+                // ユーザーの表示名を設定
                 await user.updateProfile({ displayName: displayName });
-                // 新規ユーザーをFirestoreに保存し、初期ロールを'student'に設定
+                
+                // Firestoreにユーザーのドキュメントを作成し、役割を'student'に設定
                 await db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: displayName,
                     role: 'student', // 新規登録時はデフォルトで生徒
                 });
+                
                 alert('登録が完了しました。ログインしてください。');
-                window.location.reload();
+                
+                // 登録後にログインフォームに戻す
+                if (loginForm && signupForm) {
+                     signupForm.classList.add('hidden');
+                     loginForm.classList.remove('hidden');
+                }
             } catch (error) {
-                alert(error.message);
+                alert(`登録エラー: ${error.message}`);
+                console.error("新規登録エラー:", error);
             }
         });
     }
