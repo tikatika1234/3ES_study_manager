@@ -10,6 +10,7 @@ const firebaseConfig = {
   measurementId: "G-4QGE07EM22"
 };
 
+
 // Firebaseのサービスを初期化
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -103,25 +104,34 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("signupForm: フォームが送信されました。");
             e.preventDefault();
             
-            // ⭐︎ 修正箇所: IDを使って値を取得するように変更
             const email = signupEmailInput.value;
             const password = signupPasswordInput.value;
             const displayName = signupDisplayNameInput.value;
 
             try {
                 console.log("新規ユーザー作成処理を開始します...");
+                // パスワードの最低文字数チェック
+                if (password.length < 6) {
+                    alert('パスワードは6文字以上で設定してください。');
+                    return;
+                }
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
                 console.log("Firebase Authenticationでユーザーを作成しました。UID:", user.uid);
-                await user.updateProfile({ displayName: displayName });
                 
-                console.log("Firestoreにユーザーデータを保存します。");
+                // 表示名を更新
+                await user.updateProfile({ displayName: displayName });
+                console.log("ユーザーの表示名を更新しました:", displayName);
+                
+                // Firestoreにユーザーのドキュメントを作成し、役割を'student'に設定
+                console.log("Firestoreへのデータ書き込みを開始します。");
                 await db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: displayName,
                     role: 'student', // 新規登録時はデフォルトで生徒
                 });
+                console.log("Firestoreへの書き込みが成功しました。");
                 
                 alert('登録が完了しました。ログインしてください。');
                 
@@ -132,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      console.log("新規登録後にログインフォームに戻りました。");
                 }
             } catch (error) {
+                // エラーの原因をより詳しく出力
                 alert(`登録エラー: ${error.message}`);
                 console.error("新規登録エラー:", error);
             }
