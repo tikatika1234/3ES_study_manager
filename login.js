@@ -10,7 +10,6 @@ const firebaseConfig = {
   measurementId: "G-4QGE07EM22"
 };
 
-
 // Firebaseのサービスを初期化
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -124,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await user.updateProfile({ displayName: displayName });
                 console.log("ユーザーの表示名を更新しました:", displayName);
                 
-                // Firestoreにユーザーのドキュメントを作成し、役割を'student'に設定
+                // Firestoreへのデータ書き込みを開始
                 console.log("Firestoreへのデータ書き込みを開始します。");
                 await db.collection('users').doc(user.uid).set({
                     email: user.email,
