@@ -10,7 +10,6 @@ const firebaseConfig = {
   measurementId: "G-4QGE07EM22"
 };
 
-
 // Firebaseのサービスを初期化
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -27,15 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const showSignupBtn = document.getElementById('showSignup');
     const showLoginBtn = document.getElementById('showLogin');
     
-    // ログインフォームの入力要素もIDで取得
+    // ログインフォームの入力要素
     const loginEmailInput = document.getElementById('login-email');
     const loginPasswordInput = document.getElementById('login-password');
 
-    // 新規登録フォームの入力要素もIDで取得
+    // 新規登録フォームの入力要素
     const signupEmailInput = document.getElementById('signup-email');
     const signupPasswordInput = document.getElementById('signup-password');
     const signupDisplayNameInput = document.getElementById('signup-displayName');
-
 
     // 認証状態の変更を監視するリスナー
     auth.onAuthStateChanged(async user => {
@@ -45,19 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
                     const userData = userDoc.data();
+                    console.log("ユーザーデータ:", userData);
                     if (userData.role === 'teacher') {
-                        console.log("onAuthStateChanged: 役割は'teacher'です。teacher.htmlにリダイレクトします。");
                         window.location.href = 'teacher.html';
                     } else {
-                        console.log("onAuthStateChanged: 役割は'student'です。record.htmlにリダイレクトします。");
                         window.location.href = 'record.html';
                     }
                 } else {
-                    console.warn("onAuthStateChanged: Firestoreにユーザーデータが見つかりませんでした。生徒として扱います。");
+                    console.warn("Firestoreにユーザーデータが存在しません。生徒扱いでrecord.htmlへ遷移します。");
                     window.location.href = 'record.html';
                 }
             } catch (error) {
-                console.error("onAuthStateChanged: ユーザー役割のチェック中にエラーが発生しました:", error);
+                console.error("ユーザー役割のチェック中にエラー:", error);
                 window.location.href = 'record.html';
             }
         } else {
@@ -65,31 +62,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ログインフォームと新規登録フォームの表示を切り替える
+    // ログインフォームと新規登録フォームの表示を切り替え
     if (showSignupBtn && showLoginBtn && loginForm && signupForm) {
         showSignupBtn.addEventListener('click', () => {
-            console.log("showSignupボタンがクリックされました。新規登録フォームを表示します。");
             loginForm.classList.add('hidden');
             signupForm.classList.remove('hidden');
         });
         showLoginBtn.addEventListener('click', () => {
-            console.log("showLoginボタンがクリックされました。ログインフォームを表示します。");
             signupForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
         });
     }
 
-    // ログインフォームの送信処理
+    // ログイン処理
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
-            console.log("loginForm: フォームが送信されました。");
             e.preventDefault();
             const email = loginEmailInput.value;
             const password = loginPasswordInput.value;
             try {
-                console.log("ログイン処理を開始します...");
+                console.log("ログイン処理開始...");
                 await auth.signInWithEmailAndPassword(email, password);
-                console.log("ログイン成功！onAuthStateChangedリスナーがリダイレクトを処理します。");
+                console.log("ログイン成功！onAuthStateChangedで遷移処理されます。");
             } catch (error) {
                 alert(`ログインエラー: ${error.message}`);
                 console.error("ログインエラー:", error);
@@ -97,11 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 新規登録フォームの送信処理
+    // 新規登録処理
     if (signupForm) {
-        console.log("signupForm: イベントリスナーをセットアップします。");
         signupForm.addEventListener('submit', async (e) => {
-            console.log("signupForm: フォームが送信されました。");
             e.preventDefault();
             
             const email = signupEmailInput.value;
@@ -109,40 +101,41 @@ document.addEventListener('DOMContentLoaded', () => {
             const displayName = signupDisplayNameInput.value;
 
             try {
-                console.log("新規ユーザー作成処理を開始します...");
-                // パスワードの最低文字数チェック
+                console.log("新規ユーザー作成処理開始...");
                 if (password.length < 6) {
                     alert('パスワードは6文字以上で設定してください。');
                     return;
                 }
+
+                // Firebase Authにユーザー作成
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
-                
-                console.log("Firebase Authenticationでユーザーを作成しました。UID:", user.uid);
-                
-                // 表示名を更新
+                console.log("Firebase Authenticationでユーザー作成:", user.uid);
+
+                // 表示名を設定
                 await user.updateProfile({ displayName: displayName });
-                console.log("ユーザーの表示名を更新しました:", displayName);
-                
-                // Firestoreにユーザーのドキュメントを作成し、役割を'student'に設定
-                console.log("Firestoreへのデータ書き込みを開始します。");
-                await db.collection('users').doc(user.uid).set({
-                    email: user.email,
-                    displayName: displayName,
-                    role: 'student', // 新規登録時はデフォルトで生徒
-                });
-                console.log("Firestoreへの書き込みが成功しました。");
-                
-                alert('登録が完了しました。ログインしてください。');
-                
-                // 登録後にログインフォームに戻す
-                if (loginForm && signupForm) {
-                     signupForm.classList.add('hidden');
-                     loginForm.classList.remove('hidden');
-                     console.log("新規登録後にログインフォームに戻りました。");
+
+                // Firestoreに保存（ここで必ずエラーハンドリング）
+                try {
+                    await db.collection('users').doc(user.uid).set({
+                        email: user.email,
+                        displayName: displayName,
+                        role: 'student'
+                    });
+                    console.log("Firestoreにユーザーデータを保存しました。");
+                } catch (fireErr) {
+                    console.error("Firestore書き込み失敗:", fireErr);
+                    alert(`Firestoreエラー: ${fireErr.message}`);
+                    return; // 保存できなければ遷移しない
                 }
+
+                alert('登録が完了しました。ログインしてください。');
+
+                // 登録後にログインフォームへ戻す
+                signupForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+
             } catch (error) {
-                // エラーの原因をより詳しく出力
                 alert(`登録エラー: ${error.message}`);
                 console.error("新規登録エラー:", error);
             }
