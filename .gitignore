@@ -1,1 +1,3 @@
 node_modules/
+DATABASE_URL=postgresql://db_3es_db_user:10sgndQ6TGzpA0nYutGSNlE9FTGCT5mw@dpg-d3u1j8vdiees73dtrpu0-a/db_3es_db
+PORT=3000
