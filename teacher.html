@@ -3,41 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>教師用ダッシュボード</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-    <!-- Firebase SDKのCDNを追加 -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="teacher.js" defer></script>
+    <title>教師用 学習記録表</title>
+    <link rel="stylesheet" href="teacher.css">
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">教師用ダッシュボード</h1>
-            <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
-        </div>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <label for="date-select" class="sr-only">日付選択</label>
+                <input type="date" id="date-select" class="date-label" name="recordDate" value="2025-10-25" aria-label="日付を選択">
+            </div>
+            <div class="header-right">
+                <button class="logout-btn" type="button">ログアウト</button>
+                <span class="teacher-name">○○先生</span>
+            </div>
+            
+        </header>
 
-        <h2 class="text-xl font-semibold mb-4">ようこそ、<span id="userName"></span>先生！</h2>
-        
-        <div class="flex space-x-4 mb-6">
-            <div class="w-1/3 bg-gray-50 p-4 rounded-lg shadow-sm overflow-y-auto" style="max-height: 70vh;">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">生徒リスト</h3>
-                <ul id="studentList" class="space-y-2">
-                    <!-- 生徒リストがここに動的に表示されます -->
-                </ul>
+        <main>
+            <h1 class="record-title">5年2組 学習記録表</h1>
+            <!-- ここに送信ボタンを追加（header-right の下） -->
+            <div class="header-actions">
+                <button class="submit-btn" type="button" id="submit-btn">送信</button>
             </div>
 
-            <div class="w-2/3 bg-gray-50 p-4 rounded-lg shadow-sm overflow-y-auto" style="max-height: 70vh;">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">生徒の学習記録</h3>
-                <div id="studentRecordsContainer">
-                    <p class="text-gray-500 text-center">生徒を選択してください。</p>
-                    <!-- 選択された生徒の記録がここに表示されます -->
+            <div class="record-table" role="table" aria-label="学習記録表">
+                <div class="table-header" role="row">
+                    <div class="col-student-list" role="columnheader">生徒リスト</div>
+                    <div class="col-checkbox" role="columnheader">チェック</div>
+                    <div class="col-study-record" role="columnheader">学習記録</div>
+                    <div class="col-student-comment" role="columnheader">生徒コメント</div>
+                    <div class="col-teacher-comment" role="columnheader">教師コメント</div>
                 </div>
+
+                <div class="table-row" role="row">
+                    <div class="col-student-list student-info" role="cell">
+                        <span class="student-grade-name">指定学年番号</span>
+                        <span class="student-name">生徒の名前</span>
+                    </div>
+                    <div class="col-checkbox" role="cell"><input type="checkbox" aria-label="閲覧チェック"></div>
+                    <div class="col-study-record record-summary" role="cell">
+                        各生徒の学習時間を表示する枠
+                    </div>
+                    <div class="col-student-comment" role="cell">生徒コメント表示枠</div>
+                    <div class="col-teacher-comment comment-input" role="cell"> 
+                        <textarea placeholder="コメントを入力..." aria-label="教師コメント"></textarea>
+                    </div>
+                </div>
+
+                <div class="table-row" role="row">
+                    <div class="col-student-list student-info" role="cell">
+                        <span class="student-id">例: 5211</span>
+                        <span class="student-name">中野一花</span>
+                    </div>
+                    <div class="col-checkbox" role="cell"><input type="checkbox" checked aria-label="閲覧チェック済み"></div>
+                    <div class="col-study-record record-detail" role="cell">
+                        <p>例:</p>
+                        <p>国語: 15分 | 算数: 50分 | 英語: 30分</p>
+                        <p>科学: 10分 | 物理: 0分 | etc: 50分</p>
+                    </div>
+                    <div class="col-student-comment comment-data" role="cell">
+                        今日の学習は難しかったけど、最後まで頑張りました！
+                    </div>
+                    <div class="col-teacher-comment comment-input" role="cell">
+                        <textarea placeholder="コメントを入力..." aria-label="教師コメント"></textarea>
+                    </div>
+                </div>
+
+                <div class="table-row" role="row">
+                    <div class="col-student-list student-info" role="cell">
+                        <span class="student-id">例: 5215</span>
+                        <span class="student-name">中野五月</span>
+                    </div>
+                    <div class="col-checkbox" role="cell"><input type="checkbox" aria-label="閲覧チェック"></div>
+                    <div class="col-study-record record-detail" role="cell">
+                        <p>例:</p>
+                        <p>国語: 20分 | 科学: 55分 | 物理: 25分</p>
+                        <p>数学: 25分 | 英語: 25分 | etc: 10分</p>
+                    </div>
+                    <div class="col-student-comment comment-data" role="cell">
+                        週末に向けて、英語のリスニングを頑張りました！
+                    </div>
+                    <div class="col-teacher-comment comment-input" role="cell">
+                        <textarea placeholder="コメントを入力..." aria-label="教師コメント"></textarea>
+                    </div>
+                </div>
+
             </div>
+        </main>
+        
+        <div class="vertical-scroll-indicator" aria-hidden="false">
+            <button class="arrow-up" aria-label="上へスクロール">↑</button>
+            <button class="arrow-down" aria-label="下へスクロール">↓</button>
         </div>
     </div>
 </body>
