@@ -1,9 +1,8 @@
-// ...existing code...
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.log('[record.js] START init');
 
-        // 明示的に Render の API を既定にする（必要なら record.html で上書き）
+        // 明示的に Render の API を既定にする（record.html で上書き可能）
         const API_BASE = (window.API_BASE_URL && window.API_BASE_URL.trim()) || 'https://threees-study-manager.onrender.com';
         console.log('[record.js] API_BASE:', API_BASE);
 
@@ -29,6 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return headers;
         };
 
+        // JWT ペイロードを安全にデコード（署名検証は行わない）
+        const decodeJwt = (token) => {
+            try {
+                const parts = token.split('.');
+                if (parts.length < 2) return null;
+                const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const json = decodeURIComponent(atob(base64).split('').map(c => {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(json);
+            } catch (e) {
+                console.warn('[record.js] decodeJwt failed', e);
+                return null;
+            }
+        };
+
         // グローバルエラーキャッチ
         window.addEventListener('error', (e) => {
             console.error('[record.js] Global Error:', e.message, e.filename, e.lineno);
@@ -37,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('[record.js] Unhandled Promise Rejection:', ev.reason);
         });
 
-        // 認証チェック（404/401 を区別して処理）
+        // 認証チェック：/api/auth/me が無ければ JWT をデコードしてフォールバック
         const checkAuth = async () => {
             console.log('[record.js] checkAuth - start');
             const token = localStorage.getItem('token');
@@ -53,10 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[record.js] checkAuth - fetch url:', url);
 
             try {
-                const res = await fetch(url, {
-                    headers: getHeaders()
-                });
-
+                const res = await fetch(url, { headers: getHeaders() });
                 console.log('[record.js] checkAuth - status:', res.status);
                 const responseText = await res.text().catch(() => null);
                 console.log('[record.js] checkAuth - body:', responseText);
@@ -70,9 +82,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (res.status === 404) {
-                    console.error('[record.js] checkAuth - 404 Not Found for /api/auth/me. Check API server routes and base URL.');
-                    alert('API エンドポイントが見つかりません (404)。API_BASE を確認してください：' + API_BASE);
-                    return null;
+                    // API に /api/auth/me が無い場合はトークンからユーザー情報を復元して続行
+                    console.warn('[record.js] checkAuth - /api/auth/me 404. Falling back to decode token.');
+                    const payload = decodeJwt(token);
+                    if (!payload) {
+                        console.error('[record.js] checkAuth - token decode failed, redirecting to login');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        window.location.href = 'login.html';
+                        return null;
+                    }
+                    const user = {
+                        id: payload.id || payload.sub || payload.userId || null,
+                        email: payload.email || payload.username || null,
+                        display_name: payload.display_name || payload.name || payload.email || '',
+                        role: payload.role || (payload.roles && payload.roles[0]) || 'student'
+                    };
+                    console.log('[record.js] checkAuth - recovered user from token:', user);
+                    localStorage.setItem('user', JSON.stringify(user));
+                    return user;
                 }
 
                 if (!res.ok) {
@@ -92,8 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (err) {
                 console.error('[record.js] checkAuth error:', err);
-                // ここではすぐに token を削除しない（ネットワーク等で一時的な場合がある）だが
-                // 認証失敗の可能性が高ければ削除してリダイレクト:
+                // ネットワーク等のエラー発生時はトークンデコードでフォールバックを試みる
+                const payload = decodeJwt(token);
+                if (payload) {
+                    const user = {
+                        id: payload.id || payload.sub || payload.userId || null,
+                        email: payload.email || payload.username || null,
+                        display_name: payload.display_name || payload.name || payload.email || '',
+                        role: payload.role || (payload.roles && payload.roles[0]) || 'student'
+                    };
+                    console.log('[record.js] checkAuth - recovered user from token after error:', user);
+                    localStorage.setItem('user', JSON.stringify(user));
+                    return user;
+                }
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 window.location.href = 'login.html';
@@ -101,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Canvasセットアップ（既存）
+        // Canvasセットアップ
         function setupCanvas(canvas) {
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -255,7 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const text = await res.text().catch(()=>null);
                 console.log('[record.js] Load records body:', text);
                 if (res.status === 404) {
-                    alert('記録取得 API が見つかりません (404)。サーバー側のルートを確認してください。');
+                    console.warn('[record.js] GET /api/records 404 - endpoint not found');
+                    // /api/records が無い場合は空画面を許容（または別途サーバー実装を確認）
+                    if (recordsList) recordsList.innerHTML = '<p class="text-red-500">記録取得 API が見つかりません (404)。</p>';
                     return;
                 }
                 if (!res.ok) throw new Error(`記録の取得に失敗: ${res.status}`);
@@ -272,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // displayRecords / getMondayOfWeek など既存処理（省略せずにそのまま）
+        // displayRecords / getMondayOfWeek など既存処理
         const displayRecords = (records) => {
             if (!recordsList) return;
             if (!records || records.length === 0) {
@@ -329,4 +370,3 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('予期せぬエラーが発生しました。');
     }
 });
-// ...existing code...
