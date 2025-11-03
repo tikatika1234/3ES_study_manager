@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習記録アプリ - 閲覧専用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* カスタムスタイルと黒板エフェクト */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* 黒板の背景色 */
+            background-color: #1a202c; /* bg-gray-900 */
+        }
+        .blackboard-bg {
+            background-color: #2d3748; /* bg-gray-800 */
+            /* 黒板の質感を模倣する影とボーダー */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 4px solid #a0522d; /* 濃い茶色のフレーム */
+            position: relative;
+            overflow: hidden; /* 黒板のテクスチャがはみ出さないように */
+        }
+        .blackboard-texture {
+            /* 黒板のチョークの跡のようなテクスチャ */
+            position: absolute;
+            inset: 0;
+            background-image: url('https://placehold.co/100x100/333/555?text=chalk'); /* ダミーのテクスチャ画像 */
+            background-repeat: repeat;
+            opacity: 0.1; /* 透明度を下げて控えめに */
+            z-index: 0;
+        }
+        h1, h2, h3 {
+            /* チョークのようなテキストシャドウ */
+            text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.4), -1px -1px 0px rgba(0, 0, 0, 0.2);
+        }
+        /* 入力フィールドのスタイル */
+        input[type="number"], textarea {
+            background-color: #3b4556; /* 閲覧専用の背景色 */
+            border: 1px solid #a0522d;
+            color: #f6e05e;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+            cursor: default; /* カーソルをデフォルトに変更 */
+        }
+        input[type="number"]:focus, textarea:focus {
+            outline: none;
+            ring: 0;
+            border-color: #a0522d;
+        }
+        /* プレースホルダーのスタイル */
+        input::placeholder, textarea::placeholder {
+            color: #a0aec0;
+        }
+        /* スクロールバーのカスタマイズ (黒板の質感を模倣) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #4a4a4a;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
+    <div class="w-full max-w-4xl blackboard-bg rounded-lg p-6 sm:p-8">
+        <div class="blackboard-texture"></div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-yellow-200 relative z-10">学習記録 </h1>
+
+        <div class="flex justify-between items-center mb-8 relative z-10">
+            <button id="prevWeekBtn" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                &lt; 前の週
+            </button>
+            <span id="currentWeek" class="text-xl sm:text-2xl font-semibold text-yellow-200"></span>
+            <button id="nextWeekBtn" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                次の週 &gt;
+            </button>
+        </div>
+
+        <div id="weeklyView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 relative z-10">
+            </div>
+
+        <div id="dailyDetailView" class="hidden bg-gray-700 p-6 rounded-lg shadow-md border-2 border-amber-700 relative z-10">
+            <h2 id="detailDayTitle" class="text-2xl sm:text-3xl font-bold mb-4 text-center text-yellow-200"></h2>
+
+            <button id="backToWeeklyBtn" class="absolute top-4 left-4 bg-amber-700 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-full shadow-md transition duration-300 ease-in-out text-sm transform hover:scale-105">
+                &lt; 週表示に戻る
+            </button>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2 text-yellow-200">📚 学習時間の内訳</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="japaneseTime" class="w-16 text-yellow-200">国語:</label>
+                        <input type="number" id="japaneseHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="japaneseMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="englishTime" class="w-16 text-yellow-200">英語:</label>
+                        <input type="number" id="englishHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="englishMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="mathTime" class="w-16 text-yellow-200">数学:</label>
+                        <input type="number" id="mathHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="mathMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="socialTime" class="w-16 text-yellow-200">社会:</label>
+                        <input type="number" id="socialHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="socialMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="scienceTime" class="w-16 text-yellow-200">理科:</label>
+                        <input type="number" id="scienceHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="scienceMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="otherTime" class="w-16 text-yellow-200">その他:</label>
+                        <input type="number" id="otherHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="otherMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-xl font-bold flex justify-end items-center text-yellow-200">
+                    <span>合計:</span>
+                    <span id="totalHours" class="ml-2">0</span>
+                    <span class="text-sm mr-1">時間</span>
+                    <span id="totalMinutes">0</span>
+                    <span class="text-sm">分</span>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="impression" class="block text-lg font-semibold mb-2 text-yellow-200">💭 一言感想</label>
+                <textarea id="impression" class="w-full h-24 p-3 rounded-md text-gray-400" readonly placeholder="一言感想はここに表示されます"></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label for="teacherComment" class="block text-lg font-semibold mb-2 text-yellow-200">👨‍🏫 教師からのコメント</label>
+                <textarea id="teacherComment" class="w-full h-24 p-3 rounded-md text-gray-400" readonly placeholder="教師からのコメントはここに表示されます"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const weeklyView = document.getElementById('weeklyView');
+            const dailyDetailView = document.getElementById('dailyDetailView');
+            const detailDayTitle = document.getElementById('detailDayTitle');
+            const backToWeeklyBtn = document.getElementById('backToWeeklyBtn');
+            const currentWeekSpan = document.getElementById('currentWeek');
+            const prevWeekBtn = document.getElementById('prevWeekBtn');
+            const nextWeekBtn = document.getElementById('nextWeekBtn');
+
+            // 読み取り専用の要素
+            const impressionTextarea = document.getElementById('impression');
+            const teacherCommentTextarea = document.getElementById('teacherComment');
+
+            // 学習時間入力フィールドの要素 (読み取り専用だが、値の表示には使う)
+            const subjectInputs = [
+                { id: 'japanese', hours: document.getElementById('japaneseHours'), minutes: document.getElementById('japaneseMinutes') },
+                { id: 'english', hours: document.getElementById('englishHours'), minutes: document.getElementById('englishMinutes') },
+                { id: 'math', hours: document.getElementById('mathHours'), minutes: document.getElementById('mathMinutes') },
+                { id: 'social', hours: document.getElementById('socialHours'), minutes: document.getElementById('socialMinutes') },
+                { id: 'science', hours: document.getElementById('scienceHours'), minutes: document.getElementById('scienceMinutes') },
+                { id: 'other', hours: document.getElementById('otherHours'), minutes: document.getElementById('otherMinutes') },
+            ];
+            const totalHoursSpan = document.getElementById('totalHours');
+            const totalMinutesSpan = document.getElementById('totalMinutes');
+            
+            // 現在の週の開始日 (月曜日を基準)
+            let currentWeekStart = new Date();
+            currentWeekStart.setDate(currentWeekStart.getDate() - (currentWeekStart.getDay() + 6) % 7);
+
+            // ダミーデータストレージ (閲覧のみのため、初期値を設定)
+            const learningData = {
+                // 例として、過去のデータを設定
+                '2025-11-03': { 
+                    // schedule項目を削除
+                    impression: '数学の難しい問題に挑戦できて達成感がありました！', 
+                    teacherComment: '頑張りが伝わってきます。この調子で続けてください！',
+                    japanese: {h: 0, m: 30}, english: {h: 1, m: 0}, math: {h: 1, m: 30},
+                    social: {h: 0, m: 0}, science: {h: 0, m: 0}, other: {h: 0, m: 0}
+                },
+                '2025-11-04': { 
+                    // schedule項目を削除
+                    impression: '理科のレポートに時間がかかりましたが、丁寧に取り組みました。', 
+                    teacherComment: '',
+                    japanese: {h: 0, m: 0}, english: {h: 0, m: 0}, math: {h: 0, m: 0},
+                    social: {h: 0, m: 0}, science: {h: 2, m: 0}, other: {h: 0, m: 0}
+                }
+            };
+
+            /**
+             * 日付オブジェクトを 'YYYY年M月D日' 形式の文字列にフォーマットします。
+             */
+            function formatDate(date) {
+                return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            }
+
+            /**
+             * 指定された日の学習データの合計時間を分単位で計算します。
+             */
+            function calculateTotalMinutes(data) {
+                let total = 0;
+                subjectInputs.forEach(subject => {
+                    if (data[subject.id]) {
+                        total += (data[subject.id].h * 60) + data[subject.id].m;
+                    }
+                });
+                return total;
+            }
+
+            /**
+             * 合計学習時間を計算し、表示を更新します。
+             */
+            function updateTotalLearningTime() {
+                let totalMinutes = 0;
+                subjectInputs.forEach(subject => {
+                    const hours = parseInt(subject.hours.value) || 0;
+                    const minutes = parseInt(subject.minutes.value) || 0;
+                    totalMinutes += (hours * 60) + minutes;
+                });
+
+                totalHoursSpan.textContent = Math.floor(totalMinutes / 60);
+                totalMinutesSpan.textContent = totalMinutes % 60;
+            }
+
+            /**
+             * 選択された日のデータを詳細ビューにロードします。
+             * @param {string} dateKey - 日付キー (YYYY-MM-DD)。
+             */
+            function loadDailyData(dateKey) {
+                const data = learningData[dateKey] || {};
+
+                // **scheduleTextareaへの設定処理は削除**
+                impressionTextarea.value = data.impression || 'データがありません';
+                teacherCommentTextarea.value = data.teacherComment || 'まだコメントはありません';
+
+                subjectInputs.forEach(subject => {
+                    subject.hours.value = data[subject.id]?.h || 0;
+                    subject.minutes.value = data[subject.id]?.m || 0;
+                });
+
+                updateTotalLearningTime(); // 合計時間を更新
+            }
+            
+            /**
+             * 週間表示を更新します。
+             */
+            function updateWeekDisplay() {
+                const weekEnd = new Date(currentWeekStart);
+                weekEnd.setDate(currentWeekStart.getDate() + 6);
+                currentWeekSpan.textContent = `${formatDate(currentWeekStart)} - ${formatDate(weekEnd)}`;
+
+                weeklyView.innerHTML = '';
+
+                const dayNames = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日'];
+                for (let i = 0; i < 7; i++) {
+                    const day = new Date(currentWeekStart);
+                    day.setDate(currentWeekStart.getDate() + i);
+                    const dateKey = day.toISOString().split('T')[0];
+
+                    const data = learningData[dateKey];
+                    const totalMins = data ? calculateTotalMinutes(data) : 0;
+                    const hours = Math.floor(totalMins / 60);
+                    const minutes = totalMins % 60;
+                    
+                    const impressionText = data?.impression ? `一言感想: ${data.impression.substring(0, 15)}${data.impression.length > 15 ? '...' : ''}` : '一言感想: データなし';
+
+                    const dayCardHtml = `
+                        <div class="day-card bg-gray-700 p-4 rounded-lg shadow-md border-2 border-amber-700 cursor-pointer hover:bg-gray-600 transition duration-300 ease-in-out transform hover:scale-105" data-date="${dateKey}">
+                            <h3 class="text-xl font-bold mb-2 text-yellow-200">${dayNames[i]}</h3>
+                            <p class="text-sm text-yellow-200">学習時間: ${hours}時間${minutes}分</p>
+                            <p class="text-sm text-gray-400">${impressionText}</p>
+                        </div>
+                    `;
+                    weeklyView.insertAdjacentHTML('beforeend', dayCardHtml);
+                }
+
+                // 新しく生成されたカードにイベントリスナーを再割り当て
+                document.querySelectorAll('.day-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const dateKey = card.dataset.date;
+                        const dayName = dayNames[new Date(dateKey).getDay() === 0 ? 6 : new Date(dateKey).getDay() - 1];
+                        detailDayTitle.textContent = `${dayName}の学習記録 (閲覧)`;
+                        weeklyView.classList.add('hidden');
+                        dailyDetailView.classList.remove('hidden');
+                        dailyDetailView.dataset.date = dateKey; 
+                        loadDailyData(dateKey);
+                    });
+                });
+            }
+
+            // イベントリスナー
+            backToWeeklyBtn.addEventListener('click', () => {
+                dailyDetailView.classList.add('hidden');
+                weeklyView.classList.remove('hidden');
+            });
+            
+            prevWeekBtn.addEventListener('click', () => {
+                currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+                updateWeekDisplay();
+            });
+
+            nextWeekBtn.addEventListener('click', () => {
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+                updateWeekDisplay();
+            });
+
+            // 初期ロード
+            updateWeekDisplay();
+        });
+    </script>
+</body>
+</html>
