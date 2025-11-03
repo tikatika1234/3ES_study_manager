@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.log('[record.js] START init');
-        const API_BASE = window.API_BASE_URL || 'http://localhost:3000';
+        const API_BASE = window.API_BASE_URL || 'https://threees-study-manager.onrender.com';
         console.log('[record.js] API_BASE:', API_BASE);
 
         // DOM要素取得
