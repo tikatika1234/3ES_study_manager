@@ -1,3 +1,4 @@
+<!-- ...existing code... -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -17,10 +18,12 @@
             display: none;
         }
     </style>
-    <!-- Firebase SDKのCDNを追加 -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // 開発は localhost、本番は Render の URL（例: https://your-app.onrender.com）で上書きしてください
+      window.API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
+    </script>
+
     <script src="record.js" defer></script>
 </head>
 <body class="bg-gray-100 p-4">
@@ -28,7 +31,6 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800">学習記録</h1>
             <div class="flex space-x-2">
-                <!-- ホームに戻るボタンを追加 -->
                 <button id="backToHomeBtn" class="bg-gray-300 text-gray-800 font-bold p-2 rounded-md hover:bg-gray-400 transition duration-300">ホーム</button>
                 <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
             </div>
@@ -110,3 +112,4 @@
     </div>
 </body>
 </html>
+<!-- ...existing code... -->
