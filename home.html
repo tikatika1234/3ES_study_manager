@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>津南中等学習記録表</title>
-<link rel="stylesheet" href="Homestyle.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>津南中等学習記録表</title>
+    <link rel="stylesheet" href="home.css">
+    <!-- ログインチェック用のスクリプト -->
+    <script>
+        window.API_BASE_URL = 'https://threees-study-manager.onrender.com';
+    </script>
+    <script src="home.js"></script>
 </head>
 <body>
 <div class="container">
@@ -43,13 +46,9 @@
 </tr>
 </tbody>
 </table>
-</section>
 <section class="buttons">
-<button class="task-button">課題</button>
-<button class="record-button">記録</button>
-
-
-
+    <button class="task-button">課題</button>
+    <button class="record-button" onclick="location.href='record.html'">記録</button>
 </section>
 
 </main>
