@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 社会: Number(document.getElementById('social').value) || 0,
                 その他: Number(document.getElementById('other').value) || 0
             },
-            comment: document.getElementById('dailyCommentText').value,
-            commentType: document.querySelector('input[name="commentType"]:checked')?.value || 'normal'
+            comment: document.getElementById('dailyCommentText').value
+            // commentType は削除しました
         };
 
         try {
