@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = 'http://localhost:3000';  // 開発環境用。本番環境では適切なURLに変更
-    
+    console.log("DOMContentLoaded: DOMの読み込みが完了しました。");
+
+    // 必要なDOM要素を取得
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const showSignupBtn = document.getElementById('showSignup');

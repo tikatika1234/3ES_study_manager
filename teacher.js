@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = 'http://localhost:3000';  // 本番環境では適切なURLに変更
+    const API_BASE = 'https://threees-study-manager.onrender.com';  // 本番環境のURL
     const logoutBtn = document.getElementById('logoutBtn');
     const userNameElement = document.getElementById('userName');
     const studentList = document.getElementById('studentList');
