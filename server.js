@@ -8,6 +8,8 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ...existing code...
+
 // PostgreSQL設定
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -16,32 +18,53 @@ const pool = new Pool({
   }
 });
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+// データベース初期化用のSQL
+const initDB = `
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  display_name VARCHAR(255),
+  role VARCHAR(50) DEFAULT 'student',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-// 認証ミドルウェア
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+CREATE TABLE IF NOT EXISTS study_records (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  date DATE NOT NULL,
+  subjects JSONB NOT NULL,
+  comment TEXT,
+  comment_type VARCHAR(50),
+  teacher_comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-  if (!token) return res.status(401).json({ error: '認証が必要です' });
+CREATE TABLE IF NOT EXISTS weekly_summaries (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  week_start_date DATE NOT NULL,
+  goal TEXT,
+  reflection TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`;
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'トークンが無効です' });
-    req.user = user;
-    next();
-  });
-};
+// サーバー起動時にデータベースを初期化
+pool.query(initDB)
+  .then(() => console.log('データベースの初期化が完了しました'))
+  .catch(err => console.error('データベース初期化エラー:', err));
 
-// ユーザー認証API
+// ...existing code...
+
+// ユーザー認証APIの修正
 app.post('/api/signup', async (req, res) => {
   try {
     const { email, password, displayName, role } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const result = await pool.query(
-      'INSERT INTO users (email, password, display_name, role) VALUES ($1, $2, $3, $4) RETURNING id',
+      'INSERT INTO users (email, password_hash, display_name, role) VALUES ($1, $2, $3, $4) RETURNING id',
       [email, hashedPassword, displayName, role || 'student']
     );
     
@@ -51,6 +74,43 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'メールアドレスまたはパスワードが正しくありません' });
+    }
+    
+    const user = result.rows[0];
+    const validPassword = await bcrypt.compare(password, user.password_hash);
+    
+    if (!validPassword) {
+      return res.status(401).json({ error: 'メールアドレスまたはパスワードが正しくありません' });
+    }
+    
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    
+    res.json({ 
+      token, 
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role,
+        displayName: user.display_name 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ...existing code...
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
