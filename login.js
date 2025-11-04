@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOMContentLoaded: DOMの読み込みが完了しました。");
-
+    const API_BASE = 'https://threees-study-manager.onrender.com';
     // 必要なDOM要素を取得
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
