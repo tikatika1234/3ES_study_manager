@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // API設定（本番URLをデフォルトに）
-    const API_BASE = 'https://threees-study-manager.onrender.com';
+    console.log('[record.js] 初期化開始');
     
+    // API設定（デバッグ出力追加）
+    const API_BASE = 'https://threees-study-manager.onrender.com';
+    console.log('[record.js] API_BASE:', API_BASE);
+
     // DOM要素取得
     const logoutBtn = document.getElementById('logoutBtn');
     const backToHomeBtn = document.getElementById('backToHomeBtn');
@@ -12,10 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const subjects = ['国語', '数学', '理科', '社会', 'その他'];
     
     // 共通ヘッダー
-    const getHeaders = () => ({
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-    });
+    const getHeaders = () => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+        console.log('[record.js] Headers:', { 
+            hasToken: !!token,
+            headers 
+        });
+        return headers;
+    };
 
     // 認証チェック
     const checkAuth = async () => {
@@ -87,19 +98,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 記録の取得
     const loadRecords = async () => {
-        const res = await fetch(`${API_BASE}/api/records`, {
-            headers: getHeaders()
-        });
-        
-        if (!res.ok) {
-            throw new Error(`記録の取得に失敗しました (${res.status})`);
+        try {
+            console.log('[record.js] 記録取得開始');
+            const res = await fetch(`${API_BASE}/api/records`, {
+                headers: getHeaders()
+            });
+            console.log('[record.js] Status:', res.status);
+
+            if (res.status === 404) {
+                console.error('[record.js] APIエンドポイントが見つかりません');
+                return [];
+            }
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('[record.js] API エラー:', res.status, errorText);
+                return [];
+            }
+
+            const data = await res.json();
+            console.log('[record.js] 取得成功:', data);
+            return Array.isArray(data) ? data : 
+                   Array.isArray(data?.dailyRecords) ? data.dailyRecords :
+                   Array.isArray(data?.records) ? data.records : [];
+        } catch (err) {
+            console.error('[record.js] 記録取得エラー:', err);
+            return [];
         }
-        
-        const data = await res.json();
-        return Array.isArray(data) ? data : 
-               Array.isArray(data?.dailyRecords) ? data.dailyRecords :
-               Array.isArray(data?.records) ? data.records : [];
     };
+
 
     // 記録の表示
     const displayRecords = (records) => {
