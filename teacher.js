@@ -11,8 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const studentList = document.getElementById('studentList');
     const studentRecordsContainer = document.getElementById('studentRecordsContainer');
+    const userNameElement = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-        // 生徒一覧の表示
+      // 生徒一覧の表示
     const displayStudents = (students) => {
         if (!students || students.length === 0) {
             studentList.innerHTML = '<p class="text-gray-500">生徒が登録されていません。</p>';
@@ -98,6 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadStudentRecords = loadStudentRecords;
     window.submitTeacherComment = submitTeacherComment;
 
+    // ユーザー名表示
+    userNameElement.textContent = userData.displayName || userData.email;
+
+    // ログアウト処理
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        });
+    }
+
     // 生徒一覧の取得
     const loadStudents = async () => {
         try {
@@ -107,11 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (!response.ok) throw new Error('生徒一覧の取得に失敗しました');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || '生徒一覧の取得に失敗しました');
+            }
 
             const students = await response.json();
             displayStudents(students);
         } catch (error) {
+            console.error('生徒一覧取得エラー:', error);
             alert(`エラー: ${error.message}`);
         }
     };
@@ -119,18 +137,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // 生徒の記録取得
     const loadStudentRecords = async (studentId) => {
         try {
+            studentRecordsContainer.innerHTML = '<p class="text-center">読み込み中...</p>';
+            
             const response = await fetch(`${API_URL}/api/records/${studentId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
-            if (!response.ok) throw new Error('生徒の記録の取得に失敗しました');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || '記録の取得に失敗しました');
+            }
 
             const records = await response.json();
             displayStudentRecords(records);
         } catch (error) {
-            alert(`エラー: ${error.message}`);
+            console.error('記録取得エラー:', error);
+            studentRecordsContainer.innerHTML = `<p class="text-red-500 text-center">エラー: ${error.message}</p>`;
         }
     };
 
@@ -146,13 +170,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ recordId, comment })
             });
 
-            if (!response.ok) throw new Error('コメントの保存に失敗しました');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'コメントの保存に失敗しました');
+            }
 
             alert('コメントを保存しました');
         } catch (error) {
+            console.error('コメント保存エラー:', error);
             alert(`エラー: ${error.message}`);
         }
     };
+
+    // ...existing code (displayStudents, displayStudentRecords, escapeHtml functions)...
+
+    // グローバルスコープに関数を公開
+    window.loadStudentRecords = loadStudentRecords;
+    window.submitTeacherComment = submitTeacherComment;
 
     // 初期読み込み
     loadStudents();
