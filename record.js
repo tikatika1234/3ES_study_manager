@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             subjects: {
                 国語: Number(document.getElementById('japanese').value) || 0,
                 数学: Number(document.getElementById('math').value) || 0,
+                英語: Number(document.getElementById('english').value) || 0,
                 理科: Number(document.getElementById('science').value) || 0,
                 社会: Number(document.getElementById('social').value) || 0,
                 その他: Number(document.getElementById('other').value) || 0
