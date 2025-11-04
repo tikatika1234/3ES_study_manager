@@ -45,13 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('user', JSON.stringify(data.user));
 
                 // ロール別リダイレクト
-                if (data.user.role === 'teacher') {
-                    window.location.href = 'teacher.html';
+                if (data.user.role === 'student') {
+                    window.location.href = 'home.html';  // home.html へ変更
                 } else {
-                    window.location.href = 'record.html';
+                    window.location.href = 'teacher.html';
                 }
-            } catch (error) {
-                alert(error.message);
+
+            } catch (err) {
+                alert(err.message);
             }
         });
     }
