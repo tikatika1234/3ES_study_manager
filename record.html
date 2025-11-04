@@ -18,10 +18,12 @@
             display: none;
         }
     </style>
-    <!-- Firebase SDKのCDNを追加 -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // 開発は localhost、本番は Render の URL（例: https://your-app.onrender.com）で上書きしてください
+      window.API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
+    </script>
+
     <script src="record.js" defer></script>
 </head>
 <body class="bg-gray-100 p-4">
@@ -110,3 +112,4 @@
     </div>
 </body>
 </html>
+<!-- ...existing code... -->

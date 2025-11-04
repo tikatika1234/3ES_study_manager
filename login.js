@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = 'https://threees-study-manager.onrender.com';  // 開発環境用。本番環境では適切なURLに変更
+    const API_BASE = 'http://localhost:3000';  // 開発環境用。本番環境では適切なURLに変更
     
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
