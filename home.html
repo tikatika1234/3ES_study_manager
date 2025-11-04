@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>津南中等学習記録表</title>
     <link rel="stylesheet" href="home.css">
-    <!-- ログインチェック用のスクリプト -->
-    <script>
-        window.API_BASE_URL = 'https://threees-study-manager.onrender.com';
-    </script>
     <script src="home.js"></script>
 </head>
 <body>
@@ -46,10 +42,10 @@
 </tr>
 </tbody>
 </table>
-<section class="buttons">
-    <button class="task-button">課題</button>
-    <button class="record-button" onclick="location.href='record.html'">記録</button>
-</section>
+    <section class="buttons">
+        <button class="record-button" onclick="location.href='record.html'">記録する</button>
+        <button id="logoutBtn">ログアウト</button>
+    </section>
 
 </main>
 
