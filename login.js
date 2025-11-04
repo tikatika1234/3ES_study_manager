@@ -1,17 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // API設定
     const API_BASE = 'https://threees-study-manager.onrender.com';
+
     // 必要なDOM要素を取得
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const showSignupBtn = document.getElementById('showSignup');
     const showLoginBtn = document.getElementById('showLogin');
 
-    // フォーム切り替え
+    // フォーム切り替え処理
     if (showSignupBtn && showLoginBtn && loginForm && signupForm) {
         showSignupBtn.addEventListener('click', () => {
             loginForm.classList.add('hidden');
             signupForm.classList.remove('hidden');
         });
+
         showLoginBtn.addEventListener('click', () => {
             signupForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
@@ -39,16 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(data.error || 'ログインに失敗しました');
                 }
 
-                // トークンとユーザー情報を保存
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
-                // ロール別リダイレクト
-                if (data.user.role === 'student') {
-                    window.location.href = 'home.html';  // home.html へ変更
-                } else {
-                    window.location.href = 'teacher.html';
-                }
+                // 記録ページへリダイレクト
+                window.location.href = 'record.html';
 
             } catch (err) {
                 alert(err.message);
@@ -74,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         email,
                         password,
                         displayName,
-                        role: 'student'  // デフォルトで生徒として登録
+                        role: 'student'
                     })
                 });
 
@@ -83,12 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(data.error || '登録に失敗しました');
                 }
 
-                // トークンとユーザー情報を保存
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
                 // 記録ページへリダイレクト
                 window.location.href = 'record.html';
+
             } catch (error) {
                 alert(error.message);
             }
@@ -99,11 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     
+    // ログイン済みなら記録ページへ
     if (token && user) {
-        if (user.role === 'teacher') {
-            window.location.href = 'teacher.html';
-        } else {
-            window.location.href = 'record.html';
-        }
+        window.location.href = 'record.html';
     }
 });
