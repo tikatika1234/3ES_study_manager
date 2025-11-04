@@ -1,108 +1,123 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = 'https://threees-study-manager.onrender.com';  // 開発環境用。本番環境では適切なURLに変更
-    
+    // API設定（本番URLをデフォルトに）
+    const API_BASE = 'https://threees-study-manager.onrender.com';
+
+    // DOM要素取得
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const showSignupBtn = document.getElementById('showSignup');
     const showLoginBtn = document.getElementById('showLogin');
 
-    // フォーム切り替え
-    if (showSignupBtn && showLoginBtn && loginForm && signupForm) {
-        showSignupBtn.addEventListener('click', () => {
-            loginForm.classList.add('hidden');
-            signupForm.classList.remove('hidden');
-        });
-        showLoginBtn.addEventListener('click', () => {
-            signupForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-        });
-    }
-
-    // ログイン処理
+    // ログインフォームのイベントハンドラ
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
             try {
-                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                // ログインリクエスト
+                const res = await fetch(`${API_BASE}/api/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.error || 'ログインに失敗しました');
-                }
-
-                // トークンとユーザー情報を保存
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-
-                // ロール別リダイレクト
-                if (data.user.role === 'teacher') {
-                    window.location.href = 'teacher.html';
-                } else {
-                    window.location.href = 'record.html';
-                }
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-    }
-
-    // 新規登録処理
-    if (signupForm) {
-        signupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const displayName = document.getElementById('signup-displayName').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/api/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        email,
-                        password,
-                        displayName,
-                        role: 'student'  // デフォルトで生徒として登録
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPassword').value
                     })
                 });
 
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.error || '登録に失敗しました');
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.error || `ログイン失敗 (${res.status})`);
+                }
+
+                const data = await res.json();
+                if (!data.token || !data.user) {
+                    throw new Error('サーバーからの応答が不正です');
                 }
 
                 // トークンとユーザー情報を保存
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-
-                // 記録ページへリダイレクト
-                window.location.href = 'record.html';
-            } catch (error) {
-                alert(error.message);
+                
+                // ホームページへリダイレクト
+                window.location.href = 'index.html';
+            } catch (err) {
+                console.error('ログインエラー:', err);
+                alert(err.message || 'ログインに失敗しました');
             }
         });
     }
 
-    // ログイン状態チェック
+    // 新規登録フォームのイベントハンドラ
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // パスワード確認
+                if (password !== confirmPassword) {
+                    throw new Error('パスワードが一致しません');
+                }
+
+                // 登録リクエスト
+                const res = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: document.getElementById('signupEmail').value,
+                        password: password,
+                        role: 'student'
+                    })
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.error || `登録失敗 (${res.status})`);
+                }
+
+                const data = await res.json();
+                if (!data.token || !data.user) {
+                    throw new Error('サーバーからの応答が不正です');
+                }
+
+                // トークンとユーザー情報を保存
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // ホームページへリダイレクト
+                window.location.href = 'index.html';
+            } catch (err) {
+                console.error('登録エラー:', err);
+                alert(err.message || '登録に失敗しました');
+            }
+        });
+    }
+
+    // フォーム切り替えボタンのイベントハンドラ
+    if (showSignupBtn) {
+        showSignupBtn.addEventListener('click', () => {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('signupSection').classList.remove('hidden');
+        });
+    }
+
+    if (showLoginBtn) {
+        showLoginBtn.addEventListener('click', () => {
+            document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        });
+    }
+
+    // 既存のトークンチェック（ログイン済みならリダイレクト）
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
-    
     if (token && user) {
-        if (user.role === 'teacher') {
-            window.location.href = 'teacher.html';
-        } else {
-            window.location.href = 'record.html';
-        }
+        window.location.href = 'index.html';
     }
 });
