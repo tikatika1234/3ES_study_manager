@@ -10,85 +10,36 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <label for="date-select" class="sr-only">日付選択</label>
-                <input type="date" id="date-select" class="date-label" name="recordDate" value="2025-10-25" aria-label="日付を選択">
+                <label for="dateSelect" class="sr-only">日付選択</label>
+                <input type="date" id="dateSelect" class="date-label" name="recordDate" aria-label="日付を選択">
             </div>
             <div class="header-right">
-                <button class="logout-btn" type="button">ログアウト</button>
-                <span class="teacher-name">○○先生</span>
+                <button class="logout-btn" type="button" id="logoutBtn">ログアウト</button>
+                <span class="teacher-name" id="userName">○○先生</span>
             </div>
             
         </header>
 
         <main>
-            <h1 class="record-title">5年2組 学習記録表</h1>
-            <!-- ここに送信ボタンを追加（header-right の下） -->
+            <h1 class="record-title" id="classTitle">学習記録表</h1>
+
             <div class="header-actions">
-                <button class="submit-btn" type="button" id="submit-btn">送信</button>
+                <span id="recordCount" class="text-base font-normal text-gray-700"></span>
+                <button class="submit-btn" type="button" id="submitAllCommentsBtn">✅ チェック済みを保存</button>
             </div>
 
             <div class="record-table" role="table" aria-label="学習記録表">
                 <div class="table-header" role="row">
                     <div class="col-student-list" role="columnheader">生徒リスト</div>
-                    <div class="col-checkbox" role="columnheader">チェック</div>
+                    <div class="col-checkbox" role="columnheader">保存対象</div> 
                     <div class="col-study-record" role="columnheader">学習記録</div>
                     <div class="col-student-comment" role="columnheader">生徒コメント</div>
                     <div class="col-teacher-comment" role="columnheader">教師コメント</div>
                 </div>
 
-                <div class="table-row" role="row">
-                    <div class="col-student-list student-info" role="cell">
-                        <span class="student-grade-name">指定学年番号</span>
-                        <span class="student-name">生徒の名前</span>
-                    </div>
-                    <div class="col-checkbox" role="cell"><input type="checkbox" aria-label="閲覧チェック"></div>
-                    <div class="col-study-record record-summary" role="cell">
-                        各生徒の学習時間を表示する枠
-                    </div>
-                    <div class="col-student-comment" role="cell">生徒コメント表示枠</div>
-                    <div class="col-teacher-comment comment-input" role="cell"> 
-                        <textarea placeholder="コメントを入力..." aria-label="教師コメント"></textarea>
-                    </div>
+                <div id="studentRecordsContainer">
+                    <p style="padding: 20px; text-align: center; grid-column: 1 / -1;">日付を選択し、生徒の記録を読み込んでください。</p>
                 </div>
-
-                <div class="table-row" role="row">
-                    <div class="col-student-list student-info" role="cell">
-                        <span class="student-id">例: 5211</span>
-                        <span class="student-name">中野一花</span>
-                    </div>
-                    <div class="col-checkbox" role="cell"><input type="checkbox" checked aria-label="閲覧チェック済み"></div>
-                    <div class="col-study-record record-detail" role="cell">
-                        <p>例:</p>
-                        <p>国語: 15分 | 算数: 50分 | 英語: 30分</p>
-                        <p>科学: 10分 | 物理: 0分 | etc: 50分</p>
-                    </div>
-                    <div class="col-student-comment comment-data" role="cell">
-                        今日の学習は難しかったけど、最後まで頑張りました！
-                    </div>
-                    <div class="col-teacher-comment comment-input" role="cell">
-                        <textarea placeholder="コメントを入力..." aria-label="教師コメント"></textarea>
-                    </div>
-                </div>
-
-                <div class="table-row" role="row">
-                    <div class="col-student-list student-info" role="cell">
-                        <span class="student-id">例: 5215</span>
-                        <span class="student-name">中野五月</span>
-                    </div>
-                    <div class="col-checkbox" role="cell"><input type="checkbox" aria-label="閲覧チェック"></div>
-                    <div class="col-study-record record-detail" role="cell">
-                        <p>例:</p>
-                        <p>国語: 20分 | 科学: 55分 | 物理: 25分</p>
-                        <p>数学: 25分 | 英語: 25分 | etc: 10分</p>
-                    </div>
-                    <div class="col-student-comment comment-data" role="cell">
-                        週末に向けて、英語のリスニングを頑張りました！
-                    </div>
-                    <div class="col-teacher-comment comment-input" role="cell">
-                        <textarea placeholder="コメントを入力..." aria-label="教師コメント"></textarea>
-                    </div>
-                </div>
-
             </div>
         </main>
         
@@ -97,5 +48,7 @@
             <button class="arrow-down" aria-label="下へスクロール">↓</button>
         </div>
     </div>
+    
+    <script src="teacher.js"></script>
 </body>
 </html>
