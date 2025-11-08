@@ -1,6 +1,14 @@
 const API_URL = 'https://threees-study-manager.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 既にログイン済みならリダイレクト
+    const existingUser = JSON.parse(localStorage.getItem('userData'));
+    const existingToken = localStorage.getItem('token');
+    if (existingUser && existingToken) {
+        window.location.href = existingUser.role === 'teacher' ? 'teacher.html' : 'Home.html';
+        return;
+    }
+
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
     const showSignupBtn = document.getElementById('showSignup');
@@ -35,12 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
+            if (!response.ok) throw new Error(data.error || 'ログインに失敗しました');
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('userData', JSON.stringify(data.user));
 
-            window.location.href = data.user.role === 'teacher' ? 'teacher.html' : 'record.html';
+            // 生徒は Home.html に遷移、教師は teacher.html
+            window.location.href = data.user.role === 'teacher' ? 'teacher.html' : 'Home.html';
         } catch (error) {
             alert(`ログインエラー: ${error.message}`);
         }
@@ -63,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error);
+            if (!response.ok) throw new Error(data.error || '登録に失敗しました');
 
             alert('登録が完了しました。ログインしてください。');
             signupForm.classList.add('hidden');
