@@ -4,21 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生徒用HOME画面</title>
-    <link rel="stylesheet" href="student_home.css">
+    <link rel="stylesheet" href="student_Home.css"> <!-- student_home.css -> student_Home.css に修正 -->
 </head>
 <body>
     <div class="main-container">
 
         <div class="header-area">
             <div class="nameplate-box">ネームプレート表示枠</div>
+        </div>
+
+        <!-- 右上用コンテナを追加（グリッドの menu エリア）-->
+        <div class="top-right">
             <div class="menu-area">
-                <span class="menu-text">MENU</span>
-                <button class="menu-btn" aria-label="メニューボタン">
-                    <span class="menu-bar"></span>
-                    <span class="menu-bar"></span>
-                    <span class="menu-bar"></span>
-                </button>
+                <div class="cp_offcm01">
+                    <input type="checkbox" id="cp_toggle01">
+                    <label for="cp_toggle01"><span></span></label>
+                    <div class="cp_menu">
+                        <ul>
+                            <li><a href="#">学習記録</a></li>
+                            <li><a href="#">目標設定</a></li>
+                            <li><a href="#">成績推移</a></li>
+                            <li><a href="#">設定</a></li>
+                            <li><a href="#">ログアウト</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
+
+        
         </div>
 
         <div class="date-vertical">

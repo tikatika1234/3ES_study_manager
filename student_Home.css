@@ -10,21 +10,16 @@ body, html {
 .main-container {
     width: 100%;
     height: 100%;
-    background-color: #006400; /* 濃い緑色を基調 */
+    background-color: #006400;
     display: grid;
-    /* レイアウトの定義 */
-    /* 縦: 上部ヘッダー | 中央情報 | 下部ボタン */
-    /* 横: 左側日付 | 中央情報 | 右側空白 */
     grid-template-areas: 
         "nameplate info-center menu"
         "date info-center menu"
         "date button-area menu";
-    /* 列の幅: 左(日付) | 中央(情報) | 右(メニュー) */
-    grid-template-columns: 15% 70% 15%; 
-    /* 行の高さ: 上(ネームプレート) | 中央(情報) | 下(ボタン) */
-    grid-template-rows: 15% 65% 20%; 
+    grid-template-columns: 15% 70% 15%;
+    grid-template-rows: 15% 65% 20%;
     position: relative;
-    padding: 10px;
+    padding: 10px 0 10px 10px; /* 右パディングを 0 に */
     box-sizing: border-box;
 }
 
@@ -32,11 +27,37 @@ body, html {
 .header-area {
     grid-area: nameplate;
     display: flex;
-    justify-content: space-between; /* 左（ネームプレート）と右（メニュー）を両端に配置 */
+    justify-content: flex-start; /* nameplate は左寄せ、右上は .top-right が担当 */
     align-items: flex-start;
     padding-left: 20px;
-    padding-right: 20px; /* 右端の余白 */
+    padding-right: 0;
     width: 100%;
+    box-sizing: border-box;
+}
+
+/* 右上のグリッドセル（menu 列）に配置するコンテナ */
+.top-right {
+    grid-area: menu;
+    display: flex;
+    align-items: flex-start;   /* ヘッダー行の上寄せに合わせる */
+    justify-content: flex-end; /* 右端に寄せる */
+    gap: 12px;
+    padding-right: 10px;       /* 画面端との間隔を微調整 */
+    box-sizing: border-box;
+}
+
+/* menu-area は .top-right の内部で縦並びにする（もとの振る舞いを維持） */
+.menu-area {
+    /* grid-area: menu; ← 削除（親がグリッドではないため） */
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-left: 0;
+    padding: 0;   /* top-right の padding を使う */
     box-sizing: border-box;
 }
 
@@ -56,45 +77,125 @@ body, html {
     width: auto;                             /* 横幅は内容に合わせる */
 }
 
-.menu-area {
+/* サイドメニューの実装 */
+.cp_offcm01 {
+    position: relative;
+    z-index: 1000;
+}
+
+.cp_offcm01 .cp_menu {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    cursor: pointer;
+    -webkit-transition: 0.53s transform;
+    transition: 0.53s transform;
+    -webkit-transition-timing-function: cubic-bezier(.38,.52,.23,.99);
+    transition-timing-function: cubic-bezier(.38,.52,.23,.99);
+    background-color: #38761d;
+    opacity: 0.95;
+    box-shadow: -2px 0 4px rgba(0,0,0,0.2);
+}
+
+.cp_offcm01 .cp_menu ul {
+    margin: 0;
+    padding: 60px 0 0;
+}
+
+.cp_offcm01 .cp_menu li {
+    list-style: none;
+}
+
+.cp_offcm01 .cp_menu li a {
+    display: block;
+    padding: 20px;
+    text-decoration: none;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.cp_offcm01 .cp_menu li a:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.cp_offcm01 #cp_toggle01 {
+    position: absolute;
+    display: none;
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ .cp_menu {
+    transform: translateX(-250px);
+}
+
+/* メニューボタンのスタイル */
+.cp_offcm01 #cp_toggle01 ~ label {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-start;
-    margin-left: auto;      /* ← ここで横方向に右端へ寄せる */
-    align-self: flex-start; /* 高さを変えずに上寄せ（必要に応じ center に変更） */
-    gap: 6px;               /* メニュー内要素の間隔（任意） */
-    
-
-}
-
-.menu-text {
-    color: white;
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 5px;
-    text-align: right;  /* 右寄せに設定 */
-    align-self: flex-start;  /* 親要素内で右寄せに配置 */
-}
-
-.menu-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
+    justify-content: space-between;
     width: 40px;
     height: 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    padding: 5px;
+    cursor: pointer;
+    transition: 0.5s transform;
+    transition-timing-function: cubic-bezier(.61,-0.38,.37,1.27);
 }
 
-.menu-bar {
+.cp_offcm01 #cp_toggle01:checked ~ label {
+    transform: translateX(-250px);
+}
+
+/* ハンバーガーメニューの3本線 */
+.cp_offcm01 #cp_toggle01 ~ label span {
+    position: relative;
     display: block;
     width: 100%;
     height: 4px;
     background-color: white;
     border-radius: 2px;
+    transition: transform 0.3s;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span::before,
+.cp_offcm01 #cp_toggle01 ~ label span::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: white;
+    border-radius: 2px;
+    transition: transform 0.3s;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span::before {
+    top: -13px;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span::after {
+    bottom: -13px;
+}
+
+/* メニューが開いているときの×マーク */
+.cp_offcm01 #cp_toggle01:checked ~ label span {
+    background: transparent;
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ label span::before {
+    transform: translateY(13px) rotate(45deg);
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ label span::after {
+    transform: translateY(-13px) rotate(-45deg);
+}
+
+/* 既存のメニューボタン関連のスタイルを削除 */
+.menu-btn, .menu-bar, .menu-text {
+    display: none;
 }
 
 /* -------------------- 2. 日付表示 -------------------- */
@@ -256,3 +357,4 @@ body, html {
     transform: translateY(-2px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.6);
 }
+
