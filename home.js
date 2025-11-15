@@ -17,59 +17,48 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // ユーザー名を表示（存在する場所がなければトップに追加）
-    const header = document.querySelector('.main-content');
-    if (header) {
-        const greetId = 'home-greeting';
-        if (!document.getElementById(greetId)) {
-            const el = document.createElement('div');
-            el.id = greetId;
-            el.className = 'mb-6 text-right w-full';
-            el.innerHTML = `<span class="text-gray-800">ようこそ、${escapeHtml(userData.displayName || userData.email)} さん</span>`;
-            header.prepend(el);
-        }
+    // student_Home.html 向け要素取得
+    const nameplate = document.querySelector('.nameplate-box');
+    const recordBtn = document.querySelector('.record-btn');
+    const viewBtn = document.querySelector('.view-btn');
+    const topRight = document.querySelector('.top-right');
+    const studyTimeDetail = document.querySelector('.record-table .study-time-detail');
+    const studentCommentDisplay = document.querySelector('.record-table .student-comment-display');
+    const teacherCommentDisplay = document.querySelector('.record-table .teacher-comment-display');
+
+    // 表示名・学年・クラスをネームプレートに表示
+    if (nameplate) {
+        const display = escapeHtml(userData.displayName || userData.email);
+        const grade = userData.grade ? `学年:${escapeHtml(String(userData.grade))}` : '';
+        const cls = userData.class ? `クラス:${escapeHtml(String(userData.class))}` : '';
+        nameplate.textContent = `${display} ${grade} ${cls}`.trim();
     }
 
-    // 記録ボタン -> 記録ページへ
-    const recordBtn = document.querySelector('.record-button');
-    if (recordBtn) {
-        recordBtn.addEventListener('click', () => {
-            window.location.href = 'record.html';
-        });
-    }
-
-    // 追加: タスクボタン（必要なら別ページへ）
-    const taskBtn = document.querySelector('.task-button');
-    if (taskBtn) {
-        taskBtn.addEventListener('click', () => {
-            alert('課題機能は未実装です');
-        });
-    }
-
-    // ログアウトUIを右上に追加
-    const container = document.querySelector('.container');
-    if (container && !document.getElementById('home-logout')) {
+    // ログアウトボタンを右上に追加（存在しなければ）
+    if (topRight && !document.getElementById('home-logout')) {
         const btn = document.createElement('button');
         btn.id = 'home-logout';
         btn.textContent = 'ログアウト';
-        btn.className = 'absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded';
+        btn.className = 'bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-200';
+        btn.style.alignSelf = 'flex-start';
         btn.addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('userData');
             window.location.href = 'login.html';
         });
-        container.appendChild(btn);
+        topRight.insertBefore(btn, topRight.firstChild);
     }
 
-    // 週の目標テーブル tbody を取得
-    const tableBody = document.querySelector('.weekly-goal table tbody');
+    // ボタン動作：記録ページへ移動
+    if (recordBtn) {
+        recordBtn.addEventListener('click', () => window.location.href = 'record.html');
+    }
+    if (viewBtn) {
+        viewBtn.addEventListener('click', () => window.location.href = 'record.html');
+    }
 
-    // 最新記録を取得して表示
+    // 最新記録を取得して record-table の要素に反映
     const loadLatestRecord = async () => {
-        if (!tableBody) return;
-
-        tableBody.innerHTML = `<tr><td colspan="2" class="text-center text-gray-500">読み込み中...</td></tr>`;
-
         try {
             const res = await fetch(`${API_URL}/api/records/${userData.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -82,7 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const records = await res.json();
             if (!Array.isArray(records) || records.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="2" class="text-gray-500">最新の記録はありません</td></tr>`;
+                if (studyTimeDetail) studyTimeDetail.innerHTML = '<div class="text-gray-500">記録がありません</div>';
+                if (studentCommentDisplay) studentCommentDisplay.innerHTML = '<div class="text-gray-500">--</div>';
+                if (teacherCommentDisplay) teacherCommentDisplay.innerHTML = '<div class="text-gray-500">--</div>';
                 return;
             }
 
@@ -96,30 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { subjects = JSON.parse(subjects); } catch (e) { subjects = {}; }
             }
 
-            // subjects を見やすく整形（行毎に表示）
+            // subjects を左カラムに整形
             const subjectsHtml = Object.entries(subjects || {})
-                .map(([k,v]) => `<div class="text-sm text-gray-700"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))} 分</div>`)
+                .map(([k,v]) => `<p><strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))} 分</p>`)
                 .join('');
 
-            const dateStr = latest.date ? new Date(latest.date).toLocaleDateString() : '日付不明';
-            const comment = latest.comment ? escapeHtml(latest.comment) : '<span class="text-gray-500">なし</span>';
+            if (studyTimeDetail) studyTimeDetail.innerHTML = subjectsHtml || '<div class="text-gray-500">記録なし</div>';
+            if (studentCommentDisplay) studentCommentDisplay.innerHTML = `<div class="text-sm text-gray-700"><strong>感想:</strong><div>${escapeHtml(latest.comment || '') || '<span class="text-gray-500">なし</span>'}</div></div>`;
+            if (teacherCommentDisplay) teacherCommentDisplay.innerHTML = latest.teacher_comment ? `<div class="text-sm text-gray-700"><strong>先生コメント:</strong><div>${escapeHtml(latest.teacher_comment)}</div></div>` : '<div class="text-gray-500">--</div>';
 
-            // テーブルの tbody を最新記録表示に置換
-            tableBody.innerHTML = `
-                <tr>
-                  <td style="vertical-align: top; padding: 0.75rem;">
-                    <div class="text-sm text-gray-600">最新記録（${escapeHtml(dateStr)}）</div>
-                    <div class="mt-2">${subjectsHtml}</div>
-                  </td>
-                  <td style="vertical-align: top; padding: 0.75rem;">
-                    <div class="text-sm text-gray-600">感想</div>
-                    <div class="mt-2">${comment}</div>
-                  </td>
-                </tr>
-            `;
         } catch (error) {
             console.error('最新記録取得エラー:', error);
-            tableBody.innerHTML = `<tr><td colspan="2" class="text-red-500">エラー: ${escapeHtml(error.message)}</td></tr>`;
+            if (studyTimeDetail) studyTimeDetail.innerHTML = `<div class="text-red-500">エラー: ${escapeHtml(error.message)}</div>`;
         }
     };
 
