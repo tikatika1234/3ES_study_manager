@@ -1,0 +1,350 @@
+/* 全体の設定: iPad横画面の雰囲気を出す */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh; /* 画面の高さいっぱい */
+    overflow: hidden; /* スクロールを禁止 */
+}
+
+.main-container {
+    width: 100%;
+    height: 100%;
+    background-color: #006400;
+    display: grid;
+    grid-template-areas: 
+        "nameplate info-center menu"
+        "date info-center menu"
+        "date button-area menu";
+    grid-template-columns: 15% 70% 15%;
+    grid-template-rows: 15% 65% 20%;
+    position: relative;
+    padding: 10px 0 10px 10px;
+    box-sizing: border-box;
+}
+
+/* -------------------- 1. ヘッダーエリア (ネームプレートとメニュー) -------------------- */
+.header-area {
+    grid-area: nameplate;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 20px;
+    padding-right: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.top-right {
+    grid-area: menu;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.menu-area {
+    justify-self: end;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-left: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.nameplate-box {
+    background-color: #38761d;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    border: 3px solid white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    white-space: nowrap;
+    display: inline-block;
+    transform: none !important;
+    width: auto;
+}
+
+/* サイドメニューの実装 */
+.cp_offcm01 {
+    position: relative;
+    z-index: 1000;
+}
+
+.cp_offcm01 .cp_menu {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    cursor: pointer;
+    -webkit-transition: 0.53s transform;
+    transition: 0.53s transform;
+    -webkit-transition-timing-function: cubic-bezier(.38,.52,.23,.99);
+    transition-timing-function: cubic-bezier(.38,.52,.23,.99);
+    background-color: #38761d;
+    opacity: 0.95;
+    box-shadow: -2px 0 4px rgba(0,0,0,0.2);
+}
+
+.cp_offcm01 .cp_menu ul {
+    margin: 0;
+    padding: 60px 0 0;
+}
+
+.cp_offcm01 .cp_menu li {
+    list-style: none;
+}
+
+.cp_offcm01 .cp_menu li a {
+    display: block;
+    padding: 20px;
+    text-decoration: none;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.cp_offcm01 .cp_menu li a:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.cp_offcm01 #cp_toggle01 {
+    position: absolute;
+    display: none;
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ .cp_menu {
+    transform: translateX(-250px);
+}
+
+.cp_offcm01 #cp_toggle01 ~ label {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 40px;
+    height: 30px;
+    padding: 5px;
+    cursor: pointer;
+    transition: 0.5s transform;
+    transition-timing-function: cubic-bezier(.61,-0.38,.37,1.27);
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ label {
+    transform: translateX(-250px);
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 4px;
+    background-color: white;
+    border-radius: 2px;
+    transition: transform 0.3s;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span::before,
+.cp_offcm01 #cp_toggle01 ~ label span::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: white;
+    border-radius: 2px;
+    transition: transform 0.3s;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span::before {
+    top: -13px;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span::after {
+    bottom: -13px;
+}
+
+.cp_offcm01 #cp_toggle01 ~ label span {
+    background: transparent;
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ label span {
+    background: transparent;
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ label span::before {
+    transform: translateY(13px) rotate(45deg);
+}
+
+.cp_offcm01 #cp_toggle01:checked ~ label span::after {
+    transform: translateY(-13px) rotate(-45deg);
+}
+
+.menu-btn, .menu-bar, .menu-text {
+    display: none;
+}
+
+/* -------------------- 2. 日付表示 -------------------- */
+.date-vertical {
+    grid-area: date;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.0em;
+    font-weight: bold;
+    color: white;
+    padding-left: 10px;
+}
+
+.date-item {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    margin: 22px 0;
+    position: relative;
+    padding-top: 22px; 
+    font-size: 0.95em;
+    min-width: 1.6em;
+    min-height: 70px;
+    line-height: 1.3;
+}
+.date-item::before {
+    display: none !important;
+    content: "" !important;
+}
+
+/* -------------------- 3. 中央の情報表示エリア -------------------- */
+.info-center {
+    grid-area: info-center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px 0;
+}
+
+.goal-box {
+    background-color: #fff2cc;
+    color: #333;
+    font-size: 1.8em;
+    font-weight: bold;
+    text-align: center;
+    padding: 15px 30px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+.record-table {
+    background-color: #c9af35;
+    width: 80%;
+    max-width: 800px;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    border: 3px solid white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.table-header {
+    display: contents;
+    font-weight: bold;
+    color: #333;
+    background-color: #e6b800;
+    font-size: 1.2em;
+}
+
+.table-header > div {
+    padding: 10px 5px;
+    border-right: 1px solid white;
+    border-bottom: 1px solid white;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-header > div:last-child {
+    border-right: none;
+}
+
+.table-row {
+    display: contents;
+    font-size: 1.1em;
+}
+
+.table-row > div {
+    padding: 15px 10px;
+    border-right: 1px solid white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 150px;
+}
+.table-row > div:last-child {
+    border-right: none;
+}
+
+.study-time-detail {
+    text-align: left;
+    align-items: flex-start !important;
+    line-height: 1.5;
+}
+
+.study-time-detail p {
+    margin: 2px 0;
+}
+
+/* -------------------- 4. ボタンエリア -------------------- */
+.button-area {
+    grid-area: button-area;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+}
+
+.action-btn {
+    background-color: #e6b800;
+    color: black;
+    font-size: 2em;
+    font-weight: bold;
+    padding: 15px 40px;
+    border: 5px solid white;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.1s;
+    position: relative;
+}
+
+.action-btn::before {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    border: 4px solid white;
+    border-radius: 60px;
+    pointer-events: none;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.6);
+}
+
