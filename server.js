@@ -41,14 +41,16 @@ const authenticateToken = (req, res, next) => {
 // サインアップ
 app.post('/api/signup', async (req, res) => {
   try {
-    const { email, password, displayName, role } = req.body;
+    const { email, password, displayName, role, grade, class: classNum } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'email と password が必要です' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      'INSERT INTO users (email, password_hash, display_name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, display_name, role',
-      [email, hashedPassword, displayName || null, role || 'student']
+      `INSERT INTO users (email, password_hash, display_name, role, grade, class)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id, email, display_name, role, grade, class`,
+      [email, hashedPassword, displayName || null, role || 'student', grade || null, classNum || null]
     );
 
     res.json({ success: true, user: result.rows[0] });
@@ -67,7 +69,7 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'email と password が必要です' });
 
-    const result = await pool.query('SELECT id, email, password_hash, display_name, role FROM users WHERE email = $1', [email]);
+    const result = await pool.query('SELECT id, email, password_hash, display_name, role, grade, class FROM users WHERE email = $1', [email]);
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'メールアドレスまたはパスワードが正しくありません' });
@@ -92,7 +94,9 @@ app.post('/api/login', async (req, res) => {
         id: user.id,
         email: user.email,
         role: user.role,
-        displayName: user.display_name
+        displayName: user.display_name,
+        grade: user.grade,
+        class: user.class
       }
     });
   } catch (error) {
@@ -168,7 +172,7 @@ app.get('/api/students', authenticateToken, async (req, res) => {
   try {
     if (req.user.role !== 'teacher') return res.status(403).json({ error: '権限がありません' });
 
-    const result = await pool.query('SELECT id, email, display_name FROM users WHERE role = $1', ['student']);
+    const result = await pool.query('SELECT id, email, display_name, grade, class FROM users WHERE role = $1', ['student']);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
