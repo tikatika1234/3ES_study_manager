@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const userNameElement = document.getElementById('userName');
     const logoutBtn = document.getElementById('logoutBtn');
 
+    const teacherGrade = userData.grade;
+    const teacherClass = userData.class;
+
     // ユーザー名表示
     userNameElement.textContent = userData.displayName || userData.email;
 
@@ -103,11 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        studentList.innerHTML = students.map(student => `
+        // 先生の学年・クラスに一致する生徒のみ表示
+        const filtered = students.filter(student =>
+            String(student.grade) === String(teacherGrade) &&
+            String(student.class) === String(teacherClass)
+        );
+
+        if (filtered.length === 0) {
+            studentList.innerHTML = '<p class="text-gray-500">該当する生徒がいません。</p>';
+            return;
+        }
+
+        studentList.innerHTML = filtered.map(student => `
             <li class="p-3 bg-white rounded shadow-sm hover:bg-gray-50 cursor-pointer transition duration-200"
                 onclick="loadStudentRecords('${student.id}')">
                 <div class="font-medium text-gray-800">${escapeHtml(student.display_name || '名前未設定')}</div>
                 <div class="text-sm text-gray-500">${escapeHtml(student.email)}</div>
+                <div class="text-xs text-gray-400">学年: ${student.grade} クラス: ${student.class}</div>
             </li>
         `).join('');
     };
