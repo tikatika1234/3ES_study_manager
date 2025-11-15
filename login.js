@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const displayName = document.getElementById('signup-displayName').value;
+        const grade = document.getElementById('signup-grade').value;
+        const classNum = document.getElementById('signup-class').value;
 
         try {
             const response = await fetch(`${API_URL}/api/signup`, {
@@ -68,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password, displayName })
+                body: JSON.stringify({ email, password, displayName, grade, class: classNum })
             });
 
             const data = await response.json();
