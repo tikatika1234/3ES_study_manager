@@ -17,6 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     userNameElement.textContent = userData.displayName || userData.email;
 
+    // 学年・クラス表示追加
+    const userInfoExtra = document.createElement('span');
+    userInfoExtra.className = 'ml-2 text-sm text-gray-500';
+    userInfoExtra.textContent = `(学年: ${userData.grade} クラス: ${userData.class})`;
+    userNameElement.parentNode.insertBefore(userInfoExtra, userNameElement.nextSibling);
+
     // ログアウト
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
