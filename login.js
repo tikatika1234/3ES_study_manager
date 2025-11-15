@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const existingUser = JSON.parse(localStorage.getItem('userData'));
     const existingToken = localStorage.getItem('token');
     if (existingUser && existingToken) {
-        window.location.href = existingUser.role === 'teacher' ? 'teacher.html' : 'Home.html';
+        window.location.href = existingUser.role === 'teacher' ? 'teacher.html' : 'student_Home.html';
         return;
     }
 
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('userData', JSON.stringify(data.user));
 
             // 生徒は Home.html に遷移、教師は teacher.html
-            window.location.href = data.user.role === 'teacher' ? 'teacher.html' : 'Home.html';
+            window.location.href = data.user.role === 'teacher' ? 'teacher.html' : 'student_Home.html';
         } catch (error) {
             alert(`ログインエラー: ${error.message}`);
         }
