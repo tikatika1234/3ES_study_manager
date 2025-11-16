@@ -115,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const rowsHtml = records.map(({ student, record }) => {
-            const studentId = student.id;
             const recordId = record?.id ?? null;
             const defaultText = '<span class="text-gray-400">記録なし</span>';
 
@@ -150,29 +149,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const teacherComment = record?.teacher_comment || '';
             const isCommentable = !!recordId;
 
-            // 出力は「生徒名 / 学習時間 / 生徒コメント / 教師コメント / チェック」の順
+            // 出力順はヘッダーに合わせる：生徒名 / 学習時間 / 生徒コメント / 教師コメント / チェック
             return `
-                <div class="table-row" role="row" data-record-id="${recordId}">
-                    <div class="col-student-list student-info" role="cell">
+                <div class="table-row" role="row" ${isCommentable ? `data-record-id="${escapeHtml(String(recordId))}"` : ''}>
+                    <!-- 生徒名 -->
+                    <div class="col-student-list" role="cell">
                         <span class="student-name">${escapeHtml(student.display_name || student.email || '')}</span>
                     </div>
 
-                    <div class="col-study-record record-detail" role="cell">
+                    <!-- 学習時間 -->
+                    <div class="col-study-record" role="cell">
                         ${subjectsHtml}
                     </div>
 
-                    <div class="col-student-comment comment-data" role="cell">
+                    <!-- 生徒コメント -->
+                    <div class="col-student-comment" role="cell">
                         ${studentComment ? escapeHtml(studentComment) : defaultText}
                     </div>
 
-                    <div class="col-teacher-comment comment-input" role="cell">
+                    <!-- 教師コメント（記録がある場合のみ編集可能な textarea を表示） -->
+                    <div class="col-teacher-comment" role="cell">
                         ${isCommentable
-                            ? `<textarea id="comment-${recordId}" class="teacher-comment-input" placeholder="コメントを入力..." data-record-id="${recordId}" aria-label="教師コメント">${escapeHtml(teacherComment)}</textarea>`
+                            ? `<textarea ${recordId ? `id="comment-${escapeHtml(String(recordId))}"` : ''} class="teacher-comment-input" placeholder="コメントを入力..." data-record-id="${isCommentable ? escapeHtml(String(recordId)) : ''}" aria-label="教師コメント">${escapeHtml(teacherComment)}</textarea>`
                             : defaultText}
                     </div>
 
+                    <!-- チェックボックス（recordId がない場合は disabled、id は付与しない） -->
                     <div class="col-checkbox" role="cell">
-                        <input type="checkbox" class="record-checkbox" id="checkbox-${recordId}" data-record-id="${recordId}" ${isCommentable ? '' : 'disabled'} ${isCommentable && !teacherComment ? 'checked' : ''} aria-label="コメント保存対象として選択">
+                        ${isCommentable
+                            ? `<input type="checkbox" class="record-checkbox" id="checkbox-${escapeHtml(String(recordId))}" data-record-id="${escapeHtml(String(recordId))}" ${!teacherComment ? 'checked' : ''} aria-label="コメント保存対象として選択">`
+                            : `<input type="checkbox" class="record-checkbox" disabled aria-label="コメント保存対象として選択">`}
                     </div>
                 </div>
             `;
