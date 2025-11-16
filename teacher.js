@@ -153,19 +153,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // 出力は「生徒名 / 学習時間 / 生徒コメント / 教師コメント / チェック」の順
             return `
                 <div class="table-row" role="row" data-record-id="${recordId}">
-                    <div class="col-student-list student-info" role="cell">
+                    <div class="col-student-list" role="cell">
                         <span class="student-name">${escapeHtml(student.display_name || student.email || '')}</span>
-                    </div>
+                     </div>
 
                     <div class="col-study-record record-detail" role="cell">
                         ${subjectsHtml}
                     </div>
 
-                    <div class="col-student-comment comment-data" role="cell">
+                    <div class="col-student-comment" role="cell">
                         ${studentComment ? escapeHtml(studentComment) : defaultText}
                     </div>
 
-                    <div class="col-teacher-comment comment-input" role="cell">
+                    <div class="col-teacher-comment" role="cell">
                         ${isCommentable
                             ? `<textarea id="comment-${recordId}" class="teacher-comment-input" placeholder="コメントを入力..." data-record-id="${recordId}" aria-label="教師コメント">${escapeHtml(teacherComment)}</textarea>`
                             : defaultText}
