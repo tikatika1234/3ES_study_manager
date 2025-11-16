@@ -110,9 +110,11 @@ app.post('/api/records', authenticateToken, async (req, res) => {
     const { date, subjects, comment, commentType } = req.body;
     if (!date || !subjects) return res.status(400).json({ error: 'date と subjects が必要です' });
 
+    // subjects を確実に JSON 文字列として保存
+    const subjectsJson = (typeof subjects === 'string') ? subjects : JSON.stringify(subjects);
     await pool.query(
       'INSERT INTO study_records (user_id, date, subjects, comment, comment_type) VALUES ($1, $2, $3, $4, $5)',
-      [req.user.userId, date, subjects, comment || null, commentType || null]
+      [req.user.userId, date, subjectsJson, comment || null, commentType || null]
     );
 
     res.json({ success: true });
@@ -125,6 +127,12 @@ app.post('/api/records', authenticateToken, async (req, res) => {
 app.get('/api/records/:userId', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
+
+    // 生徒は自分の記録のみ取得可能、教師は全員取得可能
+    if (req.user.role !== 'teacher' && Number(req.user.userId) !== Number(userId)) {
+      return res.status(403).json({ error: '権限がありません' });
+    }
+
     const result = await pool.query(
       'SELECT id, user_id, date, subjects, comment, comment_type, teacher_comment, created_at FROM study_records WHERE user_id = $1 ORDER BY date DESC',
       [userId]
