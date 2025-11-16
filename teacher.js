@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const recordId = record?.id ?? null;
             const defaultText = '<span class="text-gray-400">記録なし</span>';
 
-            // 学習時間表示（subjects の値が minutes か {h,m} か両方に対応）
+            // 学習時間表示
             let subjectsHtml = defaultText;
             let subjects = record?.subjects;
             if (subjects) {
@@ -127,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (typeof subjects === 'object' && subjects !== null) {
                     const items = Object.entries(subjects).map(([k, v]) => {
-                        // v が数値（分）または {h,m} か
                         if (typeof v === 'number') {
                             const mins = Number(v) || 0;
                             const h = Math.floor(mins / 60);
@@ -149,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const teacherComment = record?.teacher_comment || '';
             const isCommentable = !!recordId;
 
-            // 出力順はヘッダーに合わせる：生徒名 / 学習時間 / 生徒コメント / 教師コメント / チェック
             return `
                 <div class="table-row" role="row" ${isCommentable ? `data-record-id="${escapeHtml(String(recordId))}"` : ''}>
                     <!-- 生徒名 -->
@@ -167,14 +165,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${studentComment ? escapeHtml(studentComment) : defaultText}
                     </div>
 
-                    <!-- 教師コメント（記録がある場合のみ編集可能な textarea を表示） -->
+                    <!-- 教師コメント -->
                     <div class="col-teacher-comment" role="cell">
                         ${isCommentable
                             ? `<textarea ${recordId ? `id="comment-${escapeHtml(String(recordId))}"` : ''} class="teacher-comment-input" placeholder="コメントを入力..." data-record-id="${isCommentable ? escapeHtml(String(recordId)) : ''}" aria-label="教師コメント">${escapeHtml(teacherComment)}</textarea>`
                             : defaultText}
                     </div>
 
-                    <!-- チェックボックス（recordId がない場合は disabled、id は付与しない） -->
+                    <!-- チェックボックス -->
                     <div class="col-checkbox" role="cell">
                         ${isCommentable
                             ? `<input type="checkbox" class="record-checkbox" id="checkbox-${escapeHtml(String(recordId))}" data-record-id="${escapeHtml(String(recordId))}" ${!teacherComment ? 'checked' : ''} aria-label="コメント保存対象として選択">`
@@ -182,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-         }).join('');
+        }).join('');
 
         studentRecordsContainer.innerHTML = rowsHtml;
     };
