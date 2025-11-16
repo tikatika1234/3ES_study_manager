@@ -83,7 +83,8 @@ app.post('/api/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      // 教師が担当する grade/class をトークンに含める（フロントでの絞りや権限制御に利用）
+      { userId: user.id, role: user.role, grade: user.grade, class: user.class },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -179,6 +180,15 @@ app.get('/api/weekly-summary/:userId/:weekStartDate', authenticateToken, async (
 app.get('/api/students', authenticateToken, async (req, res) => {
   try {
     if (req.user.role !== 'teacher') return res.status(403).json({ error: '権限がありません' });
+
+    // トークンに含まれる担当学年/クラスで絞る（存在しない場合は全生徒）
+    if (req.user.grade != null && req.user.class != null) {
+      const result = await pool.query(
+        'SELECT id, email, display_name, grade, class FROM users WHERE role = $1 AND grade = $2 AND class = $3',
+        ['student', req.user.grade, req.user.class]
+      );
+      return res.json(result.rows);
+    }
 
     const result = await pool.query('SELECT id, email, display_name, grade, class FROM users WHERE role = $1', ['student']);
     res.json(result.rows);
