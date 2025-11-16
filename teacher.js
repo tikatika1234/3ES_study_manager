@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (typeof subjects === 'object' && subjects !== null) {
                     const items = Object.entries(subjects).map(([k, v]) => {
-                        // v が数値（分）または {h,m}
+                        // v が数値（分）または {h,m} か
                         if (typeof v === 'number') {
                             const mins = Number(v) || 0;
                             const h = Math.floor(mins / 60);
@@ -268,4 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // XSS対策：簡易エスケープ
     const escapeHtml = (str) => {
-        if
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    // 初期ロード
+    loadStudentsAndRecords(dateSelect.value);
+});
