@@ -216,40 +216,27 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ホームに戻る矢印ボタンのスタイル */
 .back-arrow {
     position: fixed;
-    top: 12px;        /* 左上寄せ */
-    left: 12px;
+    top: 16px;
+    left: 16px;
     z-index: 10000;
-    width: 56px;      /* 円のサイズ */
-    height: 56px;
-    border-radius: 50%;/* 丸にする */
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
     border: none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06)), rgba(0,0,0,0.65);
+    background: rgba(0,0,0,0.6);
     color: #fff;
     font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 -2px 6px rgba(255,255,255,0.04);
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    outline: 2px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.15s, transform 0.08s;
 }
-.back-arrow:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 22px rgba(0,0,0,0.55);
-    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08)), rgba(0,0,0,0.75);
-}
-.back-arrow:active {
-    transform: translateY(0) scale(0.98);
-}
-.back-arrow:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(94, 156, 255, 0.18), 0 8px 22px rgba(0,0,0,0.55);
-}
+.back-arrow:hover { background: rgba(0,0,0,0.8); transform: translateY(-1px); }
+.back-arrow:active { transform: translateY(0); }
 
-/* 小さい画面での調整 */
+/* 小さい画面で位置を少し調整 */
 @media (max-width: 640px) {
-    .back-arrow { top: 8px; left: 8px; width: 48px; height: 48px; font-size: 18px; }
+    .back-arrow { top: 8px; left: 8px; width: 40px; height: 40px; font-size: 18px; }
 }
