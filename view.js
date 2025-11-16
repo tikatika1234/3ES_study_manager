@@ -207,13 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 追加: ホームへ戻る矢印ボタン処理
-    const backToHomeBtn = document.getElementById('backToHomeBtn');
-    if (backToHomeBtn) {
-        backToHomeBtn.addEventListener('click', () => {
-            // student_Home.html に戻る
-            window.location.href = 'student_Home.html';
-        });
+    // ボタン要素がなければ DOM に作成（view.html 側で既にある場合はそれを使う）
+    let backToHomeBtn = document.getElementById('backToHomeBtn');
+    if (!backToHomeBtn) {
+        backToHomeBtn = document.createElement('button');
+        backToHomeBtn.id = 'backToHomeBtn';
+        backToHomeBtn.className = 'back-arrow back-arrow-circle';
+        backToHomeBtn.setAttribute('aria-label', 'ホームに戻る');
+        backToHomeBtn.title = 'ホームに戻る';
+        backToHomeBtn.textContent = '◀';
+        document.body.appendChild(backToHomeBtn);
     }
+    backToHomeBtn.addEventListener('click', () => {
+        window.location.href = 'student_Home.html';
+    });
 
     // 初期ロード
     (async () => {
