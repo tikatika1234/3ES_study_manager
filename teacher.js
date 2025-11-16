@@ -58,22 +58,39 @@ document.addEventListener('DOMContentLoaded', () => {
         recordCountElement.textContent = '';
         
         try {
-            // 1. 生徒一覧の取得 (前回のロジックを流用)
+            // 1. 生徒一覧の取得
             const studentsResponse = await fetch(`${API_URL}/api/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!studentsResponse.ok) throw new Error('生徒一覧の取得に失敗しました');
-            currentStudents = await studentsResponse.json();
+            let students = await studentsResponse.json();
+            
+            // 追加: クライアント側でも念のため教師の担当学年・クラスで絞る（トークン側で絞られていない場合の保険）
+            const teacherGrade = userData.grade;
+            const teacherClass = userData.class;
+            if (teacherGrade != null && teacherClass != null) {
+                students = students.filter(s => String(s.grade) === String(teacherGrade) && String(s.class) === String(teacherClass));
+            }
+            currentStudents = students;
 
-            // 2. 各生徒の記録を取得し、指定日でフィルタリング (前回のロジックを流用)
+            // 2. 各生徒の記録を取得し、指定日でフィルタリング
             currentRecords = [];
             for (const student of currentStudents) {
                 const recordsResponse = await fetch(`${API_URL}/api/records/${student.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (!recordsResponse.ok) {
+                    // 空配列扱いにして継続
+                    currentRecords.push({ student, record: null });
+                    continue;
+                }
                 const allRecords = await recordsResponse.json();
                 
-                const targetRecord = allRecords.find(r => r.date.split('T')[0] === date);
+                const targetRecord = allRecords.find(r => {
+                    try {
+                        return new Date(r.date).toISOString().split('T')[0] === date;
+                    } catch { return false; }
+                }) || null;
                 
                 currentRecords.push({ student, record: targetRecord });
             }
@@ -99,69 +116,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const rowsHtml = records.map(({ student, record }) => {
             const studentId = student.id;
-            const recordId = record?.id || null;
-            
-            // レコードがない場合のデフォルト値
+            const recordId = record?.id ?? null;
             const defaultText = '<span class="text-gray-400">記録なし</span>';
-            let subjects = record?.subjects;
-            let subjectsHtml = defaultText;
 
-            // subjectsがオブジェクトであることを確認し、HTMLを生成
+            // 学習時間表示（subjects の値が minutes か {h,m} か両方に対応）
+            let subjectsHtml = defaultText;
+            let subjects = record?.subjects;
             if (subjects) {
                 if (typeof subjects === 'string') {
-                    try { subjects = JSON.parse(subjects); } catch (e) { subjects = subjects; }
+                    try { subjects = JSON.parse(subjects); } catch (e) { subjects = {}; }
                 }
-                
                 if (typeof subjects === 'object' && subjects !== null) {
-                    subjectsHtml = Object.entries(subjects)
-                        .map(([k, v]) => `<p>${escapeHtml(k)}: ${v.h || 0}時間${v.m || 0}分</p>`)
-                        .join('');
+                    const items = Object.entries(subjects).map(([k, v]) => {
+                        // v が数値（分）または {h,m}
+                        if (typeof v === 'number') {
+                            const mins = Number(v) || 0;
+                            const h = Math.floor(mins / 60);
+                            const m = mins % 60;
+                            return `<p>${escapeHtml(k)}: ${h}時間${m}分</p>`;
+                        } else if (v && typeof v === 'object') {
+                            const h = Number(v.h) || 0;
+                            const m = Number(v.m) || 0;
+                            return `<p>${escapeHtml(k)}: ${h}時間${m}分</p>`;
+                        } else {
+                            return `<p>${escapeHtml(k)}: 0分</p>`;
+                        }
+                    });
+                    subjectsHtml = items.join('');
                 }
             }
 
             const studentComment = record?.comment || '';
             const teacherComment = record?.teacher_comment || '';
-            
-            // コメント入力欄がある（記録がある）場合にチェックボックスを有効化
             const isCommentable = !!recordId;
 
+            // 出力は「生徒名 / 学習時間 / 生徒コメント / 教師コメント / チェック」の順
             return `
                 <div class="table-row" role="row" data-record-id="${recordId}">
                     <div class="col-student-list student-info" role="cell">
-                        <span class="student-id">ID: ${escapeHtml(studentId)}</span>
-                        <span class="student-name">${escapeHtml(student.display_name || student.email)}</span>
+                        <span class="student-name">${escapeHtml(student.display_name || student.email || '')}</span>
                     </div>
-                    
-                    <div class="col-checkbox" role="cell">
-                        <input type="checkbox" 
-                                class="record-checkbox" 
-                                id="checkbox-${recordId}"
-                                data-record-id="${recordId}"
-                                ${isCommentable ? '' : 'disabled'} 
-                                ${isCommentable && !teacherComment ? 'checked' : ''} 
-                                aria-label="コメント保存対象として選択">
-                    </div>
-                    
+
                     <div class="col-study-record record-detail" role="cell">
                         ${subjectsHtml}
                     </div>
-                    
+
                     <div class="col-student-comment comment-data" role="cell">
-                        ${escapeHtml(studentComment) || defaultText}
+                        ${studentComment ? escapeHtml(studentComment) : defaultText}
                     </div>
-                    
+
                     <div class="col-teacher-comment comment-input" role="cell">
                         ${isCommentable
-                            ? `<textarea id="comment-${recordId}" 
-                                   class="teacher-comment-input" 
-                                   placeholder="コメントを入力..." 
-                                   data-record-id="${recordId}" 
-                                   aria-label="教師コメント">${escapeHtml(teacherComment)}</textarea>`
+                            ? `<textarea id="comment-${recordId}" class="teacher-comment-input" placeholder="コメントを入力..." data-record-id="${recordId}" aria-label="教師コメント">${escapeHtml(teacherComment)}</textarea>`
                             : defaultText}
+                    </div>
+
+                    <div class="col-checkbox" role="cell">
+                        <input type="checkbox" class="record-checkbox" id="checkbox-${recordId}" data-record-id="${recordId}" ${isCommentable ? '' : 'disabled'} ${isCommentable && !teacherComment ? 'checked' : ''} aria-label="コメント保存対象として選択">
                     </div>
                 </div>
             `;
-        }).join('');
+         }).join('');
 
         studentRecordsContainer.innerHTML = rowsHtml;
     };
@@ -182,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // チェックされた行のコメント入力欄のみを対象とする
         checkedBoxes.forEach(checkbox => {
-            const recordId = checkbox.dataset.recordId;
+            const recordId = String(checkbox.dataset.recordId);
             const input = document.getElementById(`comment-${recordId}`);
             
             if (!input) return; // コメント入力欄が存在しない場合はスキップ
@@ -190,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentComment = input.value;
             
             // 元のコメントを特定するために、currentRecordsから元の値を取得
-            const originalRecordItem = currentRecords.find(item => item.record?.id === recordId);
+            const originalRecordItem = currentRecords.find(item => String(item.record?.id) === recordId);
             const originalComment = originalRecordItem?.record?.teacher_comment || '';
 
             // 変更があった場合、または新規コメントの場合のみ保存対象とする
@@ -253,15 +268,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // XSS対策：簡易エスケープ
     const escapeHtml = (str) => {
-        if (str === null || str === undefined) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    };
-
-    // 初期ロード
-    loadStudentsAndRecords(dateSelect.value);
-});
+        if
