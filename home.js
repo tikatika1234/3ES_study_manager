@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recordBtn.addEventListener('click', () => window.location.href = 'record.html');
     }
     if (viewBtn) {
-        viewBtn.addEventListener('click', () => window.location.href = 'record.html');
+        viewBtn.addEventListener('click', () => window.location.href = 'view.html');
     }
 
     // 最新記録を取得して record-table の要素に反映
