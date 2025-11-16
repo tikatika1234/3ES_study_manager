@@ -206,6 +206,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateWeekDisplay();
     });
 
+    // 追加: ホームへ戻る矢印ボタン処理
+    const backToHomeBtn = document.getElementById('backToHomeBtn');
+    if (backToHomeBtn) {
+        backToHomeBtn.addEventListener('click', () => {
+            // student_Home.html に戻る
+            window.location.href = 'student_Home.html';
+        });
+    }
+
     // 初期ロード
     (async () => {
         await fetchRecordsFromServer();
