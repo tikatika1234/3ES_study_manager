@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_URL = 'https://threees-study-manager.onrender.com';
     const weeklyView = document.getElementById('weeklyView');
     const dailyDetailView = document.getElementById('dailyDetailView');
     const detailDayTitle = document.getElementById('detailDayTitle');
@@ -27,22 +28,65 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentWeekStart = new Date();
     currentWeekStart.setDate(currentWeekStart.getDate() - (currentWeekStart.getDay() + 6) % 7);
 
-    // ダミーデータストレージ (閲覧のみのため、初期値を設定)
-    const learningData = {
-        // 例として、過去のデータを設定
-        '2025-11-03': { 
-            impression: '数学の難しい問題に挑戦できて達成感がありました！', 
-            teacherComment: '頑張りが伝わってきます。この調子で続けてください！',
-            japanese: {h: 0, m: 30}, english: {h: 1, m: 0}, math: {h: 1, m: 30},
-            social: {h: 0, m: 0}, science: {h: 0, m: 0}, other: {h: 0, m: 0}
-        },
-        '2025-11-04': { 
-            impression: '理科のレポートに時間がかかりましたが、丁寧に取り組みました。', 
-            teacherComment: '',
-            japanese: {h: 0, m: 0}, english: {h: 0, m: 0}, math: {h: 0, m: 0},
-            social: {h: 0, m: 0}, science: {h: 2, m: 0}, other: {h: 0, m: 0}
-        }
+    // サーバーから読み込んだデータを格納するオブジェクト（キー: YYYY-MM-DD）
+    const learningData = {};
+
+    // 日本語/英語キーを view 側の id にマッピング
+    const subjectKeyMap = {
+        '国語': 'japanese', '数学': 'math', '英語': 'english', '理科': 'science', '社会': 'social', 'その他': 'other',
+        'japanese': 'japanese', 'math': 'math', 'english': 'english', 'science': 'science', 'social': 'social', 'other': 'other'
     };
+
+    // API から記録を取得して learningData を構築
+    async function fetchRecordsFromServer() {
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        const token = localStorage.getItem('token');
+        if (!userData || !token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/records/${userData.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(()=>({}));
+                throw new Error(err.error || '記録の取得に失敗しました');
+            }
+
+            const records = await res.json();
+            // records を日付キーごとに整形
+            records.forEach(rec => {
+                const dateObj = new Date(rec.date);
+                if (isNaN(dateObj)) return;
+                const dateKey = dateObj.toISOString().split('T')[0];
+                learningData[dateKey] = learningData[dateKey] || {};
+
+                // comment / teacher_comment をセット
+                if (rec.comment) learningData[dateKey].impression = rec.comment;
+                if (rec.teacher_comment) learningData[dateKey].teacherComment = rec.teacher_comment;
+
+                // subjects が文字列の場合はパース
+                let subjects = rec.subjects;
+                if (typeof subjects === 'string') {
+                    try { subjects = JSON.parse(subjects); } catch (e) { subjects = {}; }
+                }
+                // subjects の各キーをマッピングして h/m に変換
+                Object.entries(subjects || {}).forEach(([k, v]) => {
+                    const id = subjectKeyMap[k] || null;
+                    const minutes = Number(v) || 0;
+                    if (id) {
+                        learningData[dateKey][id] = { h: Math.floor(minutes / 60), m: minutes % 60 };
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error('記録取得エラー:', error);
+            // 失敗時は空のデータのまま表示（またはエラーメッセージ表示ロジックを追加可）
+        }
+    }
 
     /**
      * 日付オブジェクトを 'YYYY年M月D日' 形式の文字列にフォーマットします。
@@ -86,15 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function loadDailyData(dateKey) {
         const data = learningData[dateKey] || {};
-
         impressionTextarea.value = data.impression || 'データがありません';
         teacherCommentTextarea.value = data.teacherComment || 'まだコメントはありません';
-
         subjectInputs.forEach(subject => {
             subject.hours.value = data[subject.id]?.h || 0;
             subject.minutes.value = data[subject.id]?.m || 0;
         });
-
         updateTotalLearningTime(); // 合計時間を更新
     }
     
@@ -151,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // イベントリスナー
     backToWeeklyBtn.addEventListener('click', () => {
         dailyDetailView.classList.add('hidden');
+        weeklyView.classList.remove('visible');
         weeklyView.classList.remove('hidden');
     });
     
@@ -165,5 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 初期ロード
-    updateWeekDisplay();
-});
+    (async () => {
+        await fetchRecordsFromServer();
+        updateWeekDisplay();
+    })();
+ });
