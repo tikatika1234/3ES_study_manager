@@ -10,11 +10,11 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <label for="dateSelect" class="sr-only">日付選択</label>
-                <input type="date" id="dateSelect" class="date-label" name="recordDate" aria-label="日付を選択">
+                <label for="dateSelect">日付選択</label>
+                <input type="date" id="dateSelect" name="recordDate">
             </div>
             <div class="header-right">
-                <button class="logout-btn" type="button" id="logoutBtn">ログアウト</button>
+                <button class="logout-btn" id="logoutBtn">ログアウト</button>
                 <span class="teacher-name" id="userName">○○先生</span>
             </div>
         </header>
@@ -24,28 +24,22 @@
 
             <div class="header-actions">
                 <span id="recordCount"></span>
-                <button class="submit-btn" type="button" id="submitAllCommentsBtn">✅ チェック済みを保存</button>
+                <button class="submit-btn" id="submitAllCommentsBtn">✅ チェック済みを保存</button>
             </div>
 
-            <div class="record-table" role="table" aria-label="学習記録表">
-                <div class="table-header" role="row">
-                    <div class="col-student-list" role="columnheader">生徒名</div>
-                    <div class="col-study-record" role="columnheader">学習時間</div>
-                    <div class="col-student-comment" role="columnheader">生徒コメント</div>
-                    <div class="col-teacher-comment" role="columnheader">教師コメント</div>
-                    <div class="col-checkbox" role="columnheader">チェック</div>
+            <div class="record-table-wrapper">
+                <div class="record-table-header">
+                    <div class="header-cell col-student-list">生徒名</div>
+                    <div class="header-cell col-study-record">学習時間</div>
+                    <div class="header-cell col-student-comment">生徒コメント</div>
+                    <div class="header-cell col-teacher-comment">教師コメント</div>
+                    <div class="header-cell col-checkbox">チェック</div>
                 </div>
-
-                <div id="studentRecordsContainer">
-                    <p style="padding: 20px; text-align: center; grid-column: 1 / -1;">日付を選択し、生徒の記録を読み込んでください。</p>
+                <div id="studentRecordsContainer" class="record-table-body">
+                    <p style="grid-column: 1 / -1; padding: 20px; text-align: center;">日付を選択し、生徒の記録を読み込んでください。</p>
                 </div>
             </div>
         </main>
-        
-        <div class="vertical-scroll-indicator" aria-hidden="false">
-            <button class="arrow-up" aria-label="上へスクロール">↑</button>
-            <button class="arrow-down" aria-label="下へスクロール">↓</button>
-        </div>
     </div>
     
     <script src="teacher.js"></script>
