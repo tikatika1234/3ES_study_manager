@@ -9,60 +9,66 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
     <script src="record.js" defer></script>
+    <link rel="stylesheet" href="record.css">
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="container bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">学習記録</h1>
-            <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
+<body>
+        <div class="container p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">学習記録</h1>
+                <div class="flex gap-2">
+                    <button id="backBtn" class="bg-gray-500 text-white font-bold p-2 rounded-md hover:bg-gray-600 transition duration-300" title="戻る">
+                        ← 戻る
+                    </button>
+                    <button id="logoutBtn" class="bg-red-500 text-white font-bold p-2 rounded-md hover:bg-red-600 transition duration-300">ログアウト</button>
+                </div>
+            </div>
+
+            <h2 class="text-xl font-semibold mb-4">ネームプレート表示枠</h2>
+
+            <form id="recordForm" class="space-y-4 mb-8">
+                <div>
+                    <label for="date" class="block text-gray-700 text-sm font-bold mb-2">日付</label>
+                    <input type="date" id="date" name="date" class="w-full p-2 border rounded-md" required>
+                </div>
+
+                 <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="japanese" class="block text-gray-700 text-sm font-bold mb-2">国語（分）</label>
+                        <input type="number" id="japanese" name="japanese" class="w-full p-2 border rounded-md" min="0" required>
+                    </div>
+                    <div>
+                        <label for="math" class="block text-gray-700 text-sm font-bold mb-2">数学（分）</label>
+                        <input type="number" id="math" name="math" class="w-full p-2 border rounded-md" min="0" required>
+                    </div>
+                    <div>
+                        <label for="english" class="block text-gray-700 text-sm font-bold mb-2">英語（分）</label>
+                        <input type="number" id="english" name="english" class="w-full p-2 border rounded-md" min="0" required>
+                    </div>
+                    <div>
+                        <label for="science" class="block text-gray-700 text-sm font-bold mb-2">理科（分）</label>
+                        <input type="number" id="science" name="science" class="w-full p-2 border rounded-md" min="0" required>
+                    </div>
+                    <div>
+                        <label for="social" class="block text-gray-700 text-sm font-bold mb-2">社会（分）</label>
+                        <input type="number" id="social" name="social" class="w-full p-2 border rounded-md" min="0" required>
+                    </div>
+                    <div>
+                        <label for="other" class="block text-gray-700 text-sm font-bold mb-2">その他（分）</label>
+                        <input type="number" id="other" name="other" class="w-full p-2 border rounded-md" min="0" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">一日の感想</label>
+                    <textarea id="dailyCommentText" name="dailyComment" rows="3" class="w-full p-2 border rounded-md" required></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">記録する</button>
+            </form>
+
+            <div id="recordsList" class="space-y-4">
+                <!-- 記録が動的に表示されます -->
+            </div>
         </div>
-
-        <h2 class="text-xl font-semibold mb-4">ようこそ、<span id="userName"></span><span id="userInfoExtra"></span>さん！</h2>
-
-        <form id="recordForm" class="space-y-4 mb-8">
-            <div>
-                <label for="date" class="block text-gray-700 text-sm font-bold mb-2">日付</label>
-                <input type="date" id="date" name="date" class="w-full p-2 border rounded-md" required>
-            </div>
-
-             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="japanese" class="block text-gray-700 text-sm font-bold mb-2">国語（分）</label>
-                    <input type="number" id="japanese" name="japanese" class="w-full p-2 border rounded-md" min="0" required>
-                </div>
-                <div>
-                    <label for="math" class="block text-gray-700 text-sm font-bold mb-2">数学（分）</label>
-                    <input type="number" id="math" name="math" class="w-full p-2 border rounded-md" min="0" required>
-                </div>
-                <div>
-                    <label for="english" class="block text-gray-700 text-sm font-bold mb-2">英語（分）</label>
-                    <input type="number" id="english" name="english" class="w-full p-2 border rounded-md" min="0" required>
-                </div>
-                <div>
-                    <label for="science" class="block text-gray-700 text-sm font-bold mb-2">理科（分）</label>
-                    <input type="number" id="science" name="science" class="w-full p-2 border rounded-md" min="0" required>
-                </div>
-                <div>
-                    <label for="social" class="block text-gray-700 text-sm font-bold mb-2">社会（分）</label>
-                    <input type="number" id="social" name="social" class="w-full p-2 border rounded-md" min="0" required>
-                </div>
-                <div>
-                    <label for="other" class="block text-gray-700 text-sm font-bold mb-2">その他（分）</label>
-                    <input type="number" id="other" name="other" class="w-full p-2 border rounded-md" min="0" required>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">一日の感想</label>
-                <textarea id="dailyCommentText" name="dailyComment" rows="3" class="w-full p-2 border rounded-md" required></textarea>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold p-3 rounded-md hover:bg-blue-700 transition duration-300">記録する</button>
-        </form>
-
-        <div id="recordsList" class="space-y-4">
-            <!-- 記録が動的に表示されます -->
-        </div>
-    </div>
 </body>
 </html>
