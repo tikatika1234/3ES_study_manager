@@ -1,3 +1,4 @@
+// ...existing code...
 const API_URL = 'https://threees-study-manager.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,23 +14,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const userNameElement = document.getElementById('userName');
     const recordsList = document.getElementById('recordsList');
     const logoutBtn = document.getElementById('logoutBtn');
-
-    // 追加: 戻るボタン
     const backBtn = document.getElementById('backBtn');
-
-    // 追加: 日付入力要素を取得して今日をデフォルトに設定
     const dateInput = document.getElementById('date');
-    if (dateInput) {
+
+    // 日付初期値を今日に
+    if (dateInput && !dateInput.value) {
         dateInput.value = new Date().toISOString().split('T')[0];
     }
 
-    userNameElement.textContent = userData.displayName || userData.email;
+    // ユーザー名表示（要素がある場合のみ）
+    if (userNameElement) {
+        userNameElement.textContent = userData.displayName || userData.email;
+    }
 
-    // 学年・クラス表示追加
-    const userInfoExtra = document.createElement('span');
-    userInfoExtra.className = 'ml-2 text-sm text-gray-500';
-    userInfoExtra.textContent = `(学年: ${userData.grade} クラス: ${userData.class})`;
+    // 学年・クラス表示追加（userNameElement が存在する場合のみ挿入）
     if (userNameElement && userNameElement.parentNode) {
+        const userInfoExtra = document.createElement('span');
+        userInfoExtra.className = 'ml-2 text-sm text-gray-500';
+        userInfoExtra.textContent = `(学年: ${userData.grade} クラス: ${userData.class})`;
         userNameElement.parentNode.insertBefore(userInfoExtra, userNameElement.nextSibling);
     }
 
@@ -42,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 戻る処理
+    // 戻る処理（存在する場合）
     if (backBtn) {
         backBtn.addEventListener('click', () => {
             window.location.href = 'student_Home.html';
@@ -53,11 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recordForm) {
         recordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // ボタンの二重押し防止
-            const submitBtn = document.getElementById('submitRecordBtn');
-            if (submitBtn) submitBtn.disabled = true;
-
             const formData = {
                 date: (dateInput && dateInput.value) ? dateInput.value : new Date().toISOString().split('T')[0],
                 subjects: {
@@ -68,7 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     社会: Number(document.getElementById('social').value) || 0,
                     その他: Number(document.getElementById('other').value) || 0
                 },
-                comment: document.getElementById('dailyCommentText').value || ''
+                comment: document.getElementById('dailyCommentText').value
+                // commentType は削除しました
             };
 
             try {
@@ -82,24 +80,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (!response.ok) {
-                    // 可能なら詳細メッセージを取得して表示
-                    let errBody = '';
-                    try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(()=>('')); }
-                    const msg = (errBody && errBody.error) ? errBody.error : (typeof errBody === 'string' && errBody) ? errBody : '記録の保存に失敗しました';
-                    throw new Error(msg);
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || '記録の保存に失敗しました');
                 }
 
                 // フォームをクリアして再読み込み
                 recordForm.reset();
-                // リセット後に日付を今日に戻す
+                // リセット後に日付を今日に戻す（要素がある場合）
                 if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
                 alert('学習記録を保存しました');
-                await loadRecords();
+                loadRecords();
             } catch (error) {
-                console.error('保存エラー:', error);
                 alert(`エラー: ${error.message}`);
-            } finally {
-                if (submitBtn) submitBtn.disabled = false;
             }
         });
     }
@@ -114,17 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                let errBody = '';
-                try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(()=>('')); }
-                const msg = (errBody && errBody.error) ? errBody.error : '記録の取得に失敗しました';
-                throw new Error(msg);
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error || '記録の取得に失敗しました');
             }
 
             const records = await response.json();
             displayRecords(records);
         } catch (error) {
-            console.error('読み込みエラー:', error);
-            if (recordsList) recordsList.innerHTML = `<p class="text-red-500">エラー: ${escapeHtml(error.message)}</p>`;
+            alert(`エラー: ${error.message}`);
         }
     };
 
@@ -188,3 +177,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初期読み込み
     loadRecords();
 });
+// ...existing code...
