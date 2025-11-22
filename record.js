@@ -15,6 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const recordsList = document.getElementById('recordsList');
     const logoutBtn = document.getElementById('logoutBtn');
 
+    // 追加: 戻るボタン
+    const backBtn = document.getElementById('backBtn');
+
+    // 追加: 日付入力要素を取得して今日をデフォルトに設定
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
     userNameElement.textContent = userData.displayName || userData.email;
 
     // 学年・クラス表示追加
@@ -29,6 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('userData');
             window.location.href = 'login.html';
+        });
+    }
+
+    // 戻る処理
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'student_Home.html';
         });
     }
 
@@ -66,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // フォームをクリアして再読み込み
             recordForm.reset();
+            // リセット後に日付を今日に戻す
+            if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
             alert('学習記録を保存しました');
             loadRecords();
         } catch (error) {
