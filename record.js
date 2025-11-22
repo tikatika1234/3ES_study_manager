@@ -1,4 +1,3 @@
-// ...existing code...
 const API_URL = 'https://threees-study-manager.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,7 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInfoExtra = document.createElement('span');
     userInfoExtra.className = 'ml-2 text-sm text-gray-500';
     userInfoExtra.textContent = `(学年: ${userData.grade} クラス: ${userData.class})`;
-    userNameElement.parentNode.insertBefore(userInfoExtra, userNameElement.nextSibling);
+    if (userNameElement && userNameElement.parentNode) {
+        userNameElement.parentNode.insertBefore(userInfoExtra, userNameElement.nextSibling);
+    }
 
     // ログアウト
     if (logoutBtn) {
@@ -49,47 +50,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 学習記録の送信
-    recordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = {
-            date: document.getElementById('date').value,
-            subjects: {
-                国語: Number(document.getElementById('japanese').value) || 0,
-                数学: Number(document.getElementById('math').value) || 0,
-                英語: Number(document.getElementById('english').value) || 0,
-                理科: Number(document.getElementById('science').value) || 0,
-                社会: Number(document.getElementById('social').value) || 0,
-                その他: Number(document.getElementById('other').value) || 0
-            },
-            comment: document.getElementById('dailyCommentText').value
-            // commentType は削除しました
-        };
+    if (recordForm) {
+        recordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        try {
-            const response = await fetch(`${API_URL}/api/records`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+            // ボタンの二重押し防止
+            const submitBtn = document.getElementById('submitRecordBtn');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const formData = {
+                date: (dateInput && dateInput.value) ? dateInput.value : new Date().toISOString().split('T')[0],
+                subjects: {
+                    国語: Number(document.getElementById('japanese').value) || 0,
+                    数学: Number(document.getElementById('math').value) || 0,
+                    英語: Number(document.getElementById('english').value) || 0,
+                    理科: Number(document.getElementById('science').value) || 0,
+                    社会: Number(document.getElementById('social').value) || 0,
+                    その他: Number(document.getElementById('other').value) || 0
                 },
-                body: JSON.stringify(formData)
-            });
+                comment: document.getElementById('dailyCommentText').value || ''
+            };
 
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error || '記録の保存に失敗しました');
+            try {
+                const response = await fetch(`${API_URL}/api/records`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    // 可能なら詳細メッセージを取得して表示
+                    let errBody = '';
+                    try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(()=>('')); }
+                    const msg = (errBody && errBody.error) ? errBody.error : (typeof errBody === 'string' && errBody) ? errBody : '記録の保存に失敗しました';
+                    throw new Error(msg);
+                }
+
+                // フォームをクリアして再読み込み
+                recordForm.reset();
+                // リセット後に日付を今日に戻す
+                if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+                alert('学習記録を保存しました');
+                await loadRecords();
+            } catch (error) {
+                console.error('保存エラー:', error);
+                alert(`エラー: ${error.message}`);
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
             }
-
-            // フォームをクリアして再読み込み
-            recordForm.reset();
-            // リセット後に日付を今日に戻す
-            if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
-            alert('学習記録を保存しました');
-            loadRecords();
-        } catch (error) {
-            alert(`エラー: ${error.message}`);
-        }
-    });
+        });
+    }
 
     // 記録の読み込み
     const loadRecords = async () => {
@@ -101,14 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error || '記録の取得に失敗しました');
+                let errBody = '';
+                try { errBody = await response.json(); } catch (_) { errBody = await response.text().catch(()=>('')); }
+                const msg = (errBody && errBody.error) ? errBody.error : '記録の取得に失敗しました';
+                throw new Error(msg);
             }
 
             const records = await response.json();
             displayRecords(records);
         } catch (error) {
-            alert(`エラー: ${error.message}`);
+            console.error('読み込みエラー:', error);
+            if (recordsList) recordsList.innerHTML = `<p class="text-red-500">エラー: ${escapeHtml(error.message)}</p>`;
         }
     };
 
@@ -172,4 +188,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初期読み込み
     loadRecords();
 });
-// ...existing code...
