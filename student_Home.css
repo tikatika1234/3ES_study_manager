@@ -155,7 +155,7 @@ body, html {
     display: block;
     width: 100%;
     height: 4px;
-    background-color: white;
+    background-color: #ffffff;
     border-radius: 2px;
     transition: transform 0.3s;
 }
@@ -167,7 +167,7 @@ body, html {
     left: 0;
     width: 100%;
     height: 4px;
-    background-color: white;
+    background-color: #ffffff;
     border-radius: 2px;
     transition: transform 0.3s;
 }
