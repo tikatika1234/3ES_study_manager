@@ -24,11 +24,11 @@
                     <label for="cp_toggle01"><span></span></label>
                     <div class="cp_menu">
                         <ul>
-                            <li><a href="#">学習記録</a></li>
-                            <li><a href="#">目標設定</a></li>
-                            <li><a href="#">成績推移</a></li>
-                            <li><a href="#">設定</a></li>
-                            <li><a href="#">ログアウト</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#" id="sidebar-logout">ログアウト</a></li>
                         </ul>
                     </div>
                 </div>
@@ -98,6 +98,35 @@
             items[0].textContent = numToKanji(month) + '月';
             items[1].textContent = numToKanji(day) + '日';
             items[2].textContent = weekday + '曜日';
+        }
+    });
+
+    // サイドバーのクローズ処理
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleCheckbox = document.getElementById('cp_toggle01');
+        const mainContainer = document.querySelector('.main-container');
+
+        // 画面全体クリック時にサイドバーを閉じる
+        mainContainer.addEventListener('click', function (e) {
+            // クリック対象がメニュー内またはチェックボックスのラベルでなければ閉じる
+            if (!e.target.closest('.cp_offcm01') && toggleCheckbox.checked) {
+                toggleCheckbox.checked = false;
+            }
+        });
+    });
+
+    // サイドバーのログアウト機能
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoutLink = document.getElementById('sidebar-logout');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                // localStorage からトークンとユーザーデータを削除
+                localStorage.removeItem('token');
+                localStorage.removeItem('userData');
+                // ログインページへ移動
+                window.location.href = 'login.html';
+            });
         }
     });
     </script>
