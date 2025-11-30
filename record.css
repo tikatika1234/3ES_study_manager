@@ -1,0 +1,99 @@
+/* 基本スタイル */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* 変更: 背景画像を追加 */
+    background-color: #f3f4f6; /* フォールバック色 */
+    background-image: url("black bord 2.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover; /* 端を切りたくない場合は contain に変更してください */
+    font-family: 'Inter', sans-serif;
+}
+
+/* コンテナ */
+/* 背景画像を透けさせるためにコンテナ自体を半透明にします。
+   ただし、入力欄やコメントなどのブロックは個別に不透明にします。 */
+.container {
+    max-width: 56rem;
+    margin: 0 auto;
+    background-color:rgba(207, 238, 215, 0.9); /* 透過率を 0.5 に設定 */
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); /* 影を若干弱めるなど調整可能 */
+    backdrop-filter: blur(2px); /* 好みで反射ぼかし */
+    border: 3px solid #ff8c00; /* オレンジ色の線を追加 */
+}
+
+/* フォーム要素 */
+/* 入力欄とテキストエリアは白の不透明背景にして、背景画像が透けないようにする */
+input[type="date"],
+input[type="number"],
+textarea {
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #ffffff; /* 不透明にする */
+    border: 2px solid #ff8c00; /* オレンジ色の線に変更 */
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+}
+
+input[type="date"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* 記録表示ブロック（動的に作る要素用） */
+/* 記録一覧の各カードも不透明にして、背景画像が文字に重ならないようにする */
+#recordsList .record-card {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* ボタンスタイル */
+button {
+    transition: all 0.3s ease;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* 記録リストのアニメーション */
+#recordsList {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 640px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}

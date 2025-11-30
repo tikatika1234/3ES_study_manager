@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒用HOME画面</title>
+    <!-- 修正: 実際に存在するファイル名に合わせる -->
+    <link rel="stylesheet" href="student_Home.css">
+    <!-- home.js を読み込んでボタンや最新記録の処理を有効にする -->
+    <script src="home.js" defer></script>
+</head>
+<body>
+    <div class="main-container">
+
+        <div class="header-area">
+            <div class="nameplate-box">ネームプレート表示枠</div>
+        </div>
+
+        <!-- 右上用コンテナを追加（グリッドの menu エリア）-->
+        <div class="top-right">
+            <div class="menu-area">
+                <div class="cp_offcm01">
+                    <input type="checkbox" id="cp_toggle01">
+                    <label for="cp_toggle01"><span></span></label>
+                    <div class="cp_menu">
+                        <ul>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#">準備中</a></li>
+                            <li><a href="#" id="sidebar-logout">ログアウト</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="date-vertical">
+            <div class="date-item">月</div>
+            <div class="date-item">日</div>
+            <div class="date-item">曜日</div>
+        </div>
+
+        <div class="info-center">
+            <div class="goal-box">今週の目標表示枠</div>
+
+            <div class="record-table">
+                <div class="table-header">
+                    <div class="header-study">学習時間</div>
+                    <div class="header-student-comment">生徒コメント</div>
+                    <div class="header-teacher-comment">教師コメント</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="study-time-detail">
+                        <p>国語：○分</p>
+                        <p>数学：○分</p>
+                        <p>英語：○分</p>
+                        <p>科学：○分</p>
+                        <p>物理：○分</p>
+                        <p>etc：○分</p>
+                    </div>
+                    <div class="student-comment-display">生徒コメント表示枠</div>
+                    <div class="teacher-comment-display">教師コメント表示枠</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-area">
+            <button class="action-btn view-btn">閲覧</button>
+            <button class="action-btn record-btn">記録</button>
+        </div>
+
+    </div>
+
+    <script>
+    // 今日の日付を漢数字で .date-item にセット
+    document.addEventListener('DOMContentLoaded', function () {
+        function numToKanji(n) {
+            const d = ['零','一','二','三','四','五','六','七','八','九'];
+            if (n === 0) return '零';
+            if (n <= 10) return n === 10 ? '十' : d[n];
+            if (n < 20) return '十' + (n % 10 === 0 ? '' : d[n % 10]);
+            const tens = Math.floor(n / 10);
+            const ones = n % 10;
+            let res = (tens === 1 ? '十' : d[tens] + '十');
+            if (ones) res += d[ones];
+            return res;
+        }
+
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        const weekday = ['日','月','火','水','木','金','土'][now.getDay()];
+
+        const items = document.querySelectorAll('.date-vertical .date-item');
+        if (items.length >= 3) {
+            items[0].textContent = numToKanji(month) + '月';
+            items[1].textContent = numToKanji(day) + '日';
+            items[2].textContent = weekday + '曜日';
+        }
+    });
+
+    // サイドバーのクローズ処理
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleCheckbox = document.getElementById('cp_toggle01');
+        const mainContainer = document.querySelector('.main-container');
+
+        // 画面全体クリック時にサイドバーを閉じる
+        mainContainer.addEventListener('click', function (e) {
+            // クリック対象がメニュー内またはチェックボックスのラベルでなければ閉じる
+            if (!e.target.closest('.cp_offcm01') && toggleCheckbox.checked) {
+                toggleCheckbox.checked = false;
+            }
+        });
+    });
+
+    // サイドバーのログアウト機能
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoutLink = document.getElementById('sidebar-logout');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                // localStorage からトークンとユーザーデータを削除
+                localStorage.removeItem('token');
+                localStorage.removeItem('userData');
+                // ログインページへ移動
+                window.location.href = 'login.html';
+            });
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習記録アプリ - 閲覧専用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="view.css">
+    <link rel="stylesheet" href="view.caa"> <!-- 追加: view.caa を読み込む -->
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
+    <!-- 追加: 固定のホームへ戻る矢印ボタン -->
+    <button id="backToHomeBtn" class="back-arrow back-arrow-circle" aria-label="ホームに戻る" title="ホームに戻る">◀</button>
+
+    <div class="w-full max-w-4xl blackboard-bg rounded-lg p-6 sm:p-8">
+        <div class="blackboard-texture"></div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-6 text-yellow-200 relative z-10">学習記録 (閲覧専用)</h1>
+
+        <div class="flex justify-between items-center mb-8 relative z-10">
+            <button id="prevWeekBtn" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                &lt; 前の週
+            </button>
+            <span id="currentWeek" class="text-xl sm:text-2xl font-semibold text-yellow-200"></span>
+            <button id="nextWeekBtn" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                次の週 &gt;
+            </button>
+        </div>
+
+        <div id="weeklyView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 relative z-10">
+            </div>
+
+        <div id="dailyDetailView" class="hidden bg-gray-700 p-6 rounded-lg shadow-md border-2 border-amber-700 relative z-10">
+            <h2 id="detailDayTitle" class="text-2xl sm:text-3xl font-bold mb-4 text-center text-yellow-200"></h2>
+
+            <button id="backToWeeklyBtn" class="absolute top-4 left-4 bg-amber-700 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-full shadow-md transition duration-300 ease-in-out text-sm transform hover:scale-105">
+                &lt; 週表示に戻る
+            </button>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2 text-yellow-200">📚 学習時間の内訳</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex items-center space-x-2">
+                        <label for="japaneseTime" class="w-16 text-yellow-200">国語:</label>
+                        <input type="number" id="japaneseHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="japaneseMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="englishTime" class="w-16 text-yellow-200">英語:</label>
+                        <input type="number" id="englishHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="englishMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="mathTime" class="w-16 text-yellow-200">数学:</label>
+                        <input type="number" id="mathHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="mathMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="socialTime" class="w-16 text-yellow-200">社会:</label>
+                        <input type="number" id="socialHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="socialMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="scienceTime" class="w-16 text-yellow-200">理科:</label>
+                        <input type="number" id="scienceHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="scienceMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label for="otherTime" class="w-16 text-yellow-200">その他:</label>
+                        <input type="number" id="otherHours" class="w-16 p-2 text-center" min="0" max="23" value="0" readonly>
+                        <span class="text-sm text-yellow-200">時間</span>
+                        <input type="number" id="otherMinutes" class="w-16 p-2 text-center" min="0" max="59" value="0" readonly>
+                        <span class="text-sm text-yellow-200">分</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-xl font-bold flex justify-end items-center text-yellow-200">
+                    <span>合計:</span>
+                    <span id="totalHours" class="ml-2">0</span>
+                    <span class="text-sm mr-1">時間</span>
+                    <span id="totalMinutes">0</span>
+                    <span class="text-sm">分</span>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="impression" class="block text-lg font-semibold mb-2 text-yellow-200">💭 一言感想</label>
+                <textarea id="impression" class="w-full h-24 p-3 rounded-md text-gray-400" readonly placeholder="一言感想はここに表示されます"></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label for="teacherComment" class="block text-lg font-semibold mb-2 text-yellow-200">👨‍🏫 教師からのコメント</label>
+                <textarea id="teacherComment" class="w-full h-24 p-3 rounded-md text-gray-400" readonly placeholder="教師からのコメントはここに表示されます"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="view.js" defer></script>
+</body>
+</html>
