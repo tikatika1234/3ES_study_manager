@@ -26,7 +26,7 @@ if (rawDbUrl) {
 
 const pool = new Pool({
     connectionString,
-    ssl: { rejectUnauthorized: false }
+    ssl:false
 });
 
 app.use(cors());
