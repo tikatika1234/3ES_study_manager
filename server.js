@@ -140,7 +140,7 @@ app.post('/api/records', authenticateToken, async (req, res) => {
       : JSON.stringify(subjects);
 
     await pool.query(
-      `INSERT INTO study_records (user_id, date, subjects, comment, comment_type)
+      `INSERT INTO records (user_id, date, subjects, comment, comment_type)
        VALUES ($1, $2, $3, $4, $5)`,
       [req.user.userId, date, subjectsJson, comment || null, commentType || null]
     );
@@ -164,7 +164,7 @@ app.get('/api/records/:userId', authenticateToken, async (req, res) => {
 
     const result = await pool.query(
       `SELECT id, user_id, date, subjects, comment, comment_type, teacher_comment, created_at
-       FROM study_records WHERE user_id = $1 ORDER BY date DESC`,
+       FROM records WHERE user_id = $1 ORDER BY date DESC`,
       [userId]
     );
 
@@ -260,7 +260,7 @@ app.post('/api/teacher-comment', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'recordId が必要です' });
 
     await pool.query(
-      'UPDATE study_records SET teacher_comment = $1 WHERE id = $2',
+      'UPDATE records SET teacher_comment = $1 WHERE id = $2',
       [comment || null, recordId]
     );
 
