@@ -26,9 +26,7 @@ if (rawDbUrl) {
 
 const pool = new Pool({
     connectionString,
-    ssl: process.env.NODE_ENV === "production"
-        ? { rejectUnauthorized: false }
-        : false
+    ssl:false
 });
 
 app.use(cors());
