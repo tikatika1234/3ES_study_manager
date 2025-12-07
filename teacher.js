@@ -1,4 +1,4 @@
-const API_URL = 'http://160.251.251.133/';
+const API_URL = 'http://160.251.251.133:3000/';
 
 document.addEventListener('DOMContentLoaded', () => {
     const userData = JSON.parse(localStorage.getItem('userData'));
