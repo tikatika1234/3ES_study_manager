@@ -12,22 +12,23 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // PostgreSQL設定（安全なフォールバックと本番用SSLの考慮）
-const rawDbUrl = process.env.DATABASE_URL || process.env.PG_CONNECTION || null;
+const rawDbUrl = process.env.DATABASE_URL || process.env.PG_CONNECTION;
+
 let connectionString;
+
 if (rawDbUrl) {
-    // 既存の置換が必要なら行う（存在しない場合はそのまま使う）
-    connectionString = rawDbUrl.includes('original_db_name')
-        ? rawDbUrl.replace('original_db_name', 'study_manager')
-        : rawDbUrl;
+    // postgres:// → postgresql:// の変換（必要な場合）
+    connectionString = rawDbUrl.replace("postgres://", "postgresql://");
 } else {
-    // 環境変数が無ければローカルのフォールバック（必要に応じて変更してください）
-    connectionString = 'postgresql://postgres:postgres@localhost:5432/study_manager';
+    console.warn("postgresql://postgres:2012son@localhost:5432/study_manager");
+    connectionString = "postgresql://postgres:postgres@localhost:5432/study_manager";
 }
 
 const pool = new Pool({
-  connectionString,
-  // 本番環境（例: Render）では SSL を有効にする。ローカルでは無効。
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    connectionString,
+    ssl: process.env.NODE_ENV === "production"
+        ? { rejectUnauthorized: false }
+        : false
 });
 
 app.use(cors());
