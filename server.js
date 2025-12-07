@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 // PostgreSQL設定
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL.replace('original_db_name', 'study_manager'), // ここでデータベース名を変更
   ssl: {
     rejectUnauthorized: false
   }
