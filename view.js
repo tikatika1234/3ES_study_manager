@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://160.251.251.133:3000/';
+    const API_URL = 'http://160.251.251.133:3000';
     const weeklyView = document.getElementById('weeklyView');
     const dailyDetailView = document.getElementById('dailyDetailView');
     const detailDayTitle = document.getElementById('detailDayTitle');
