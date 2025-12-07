@@ -5,15 +5,29 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
+// 追加: .env を読み込む（ローカルで環境変数を使う場合に便利）
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// PostgreSQL設定
+// PostgreSQL設定（安全なフォールバックと本番用SSLの考慮）
+const rawDbUrl = process.env.DATABASE_URL || process.env.PG_CONNECTION || null;
+let connectionString;
+if (rawDbUrl) {
+    // 既存の置換が必要なら行う（存在しない場合はそのまま使う）
+    connectionString = rawDbUrl.includes('original_db_name')
+        ? rawDbUrl.replace('original_db_name', 'study_manager')
+        : rawDbUrl;
+} else {
+    // 環境変数が無ければローカルのフォールバック（必要に応じて変更してください）
+    connectionString = 'postgresql://postgres:postgres@localhost:5432/study_manager';
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL.replace('original_db_name', 'study_manager'), // ここでデータベース名を変更
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString,
+  // 本番環境（例: Render）では SSL を有効にする。ローカルでは無効。
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 app.use(cors());
