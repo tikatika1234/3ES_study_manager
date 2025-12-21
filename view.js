@@ -37,6 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
         'japanese': 'japanese', 'math': 'math', 'english': 'english', 'science': 'science', 'social': 'social', 'other': 'other'
     };
 
+    // --- 日付処理ヘルパー（ローカル日付ベースでキーを作成） ---
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+    function dateToKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+    function parseDateInput(dateStr) {
+        if (!dateStr) return null;
+        const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
+        if (isoDateOnly.test(dateStr)) {
+            const [y,m,d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+        const dt = new Date(dateStr);
+        return isNaN(dt) ? null : dt;
+    }
+    function dateKeyToDate(dateKey) {
+        if (!dateKey) return null;
+        const [y,m,d] = dateKey.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    }
+    // --- /日付処理ヘルパー ---
+
     // API から記録を取得して learningData を構築
     async function fetchRecordsFromServer() {
         const userData = JSON.parse(localStorage.getItem('userData'));
@@ -58,9 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const records = await res.json();
             // records を日付キーごとに整形
             records.forEach(rec => {
-                const dateObj = new Date(rec.date);
-                if (isNaN(dateObj)) return;
-                const dateKey = dateObj.toISOString().split('T')[0];
+                const dateObj = parseDateInput(rec.date);
+                if (!dateObj) return;
+                const dateKey = dateToKey(dateObj);
+
                 learningData[dateKey] = learningData[dateKey] || {};
 
                 // comment / teacher_comment をセット
@@ -153,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 7; i++) {
             const day = new Date(currentWeekStart);
             day.setDate(currentWeekStart.getDate() + i);
-            const dateKey = day.toISOString().split('T')[0];
+            const dateKey = dateToKey(day);
 
             const data = learningData[dateKey];
             const totalMins = data ? calculateTotalMinutes(data) : 0;
@@ -179,7 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.day-card').forEach(card => {
             card.addEventListener('click', () => {
                 const dateKey = card.dataset.date;
-                const dayName = dayNames[new Date(dateKey).getDay() === 0 ? 6 : new Date(dateKey).getDay() - 1];
+                const d = dateKeyToDate(dateKey);
+                const dayName = dayNames[d.getDay() === 0 ? 6 : d.getDay() - 1];
                 detailDayTitle.textContent = `${dayName}の学習記録 (閲覧)`;
                 weeklyView.classList.add('hidden');
                 dailyDetailView.classList.remove('hidden');
@@ -188,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-
+    
     // イベントリスナー
     backToWeeklyBtn.addEventListener('click', () => {
         dailyDetailView.classList.add('hidden');
