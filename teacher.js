@@ -1,6 +1,21 @@
 const API_URL = 'http://160.251.251.133:3000';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- 日付処理ヘルパー（ローカル日付ベース） ---
+    const pad = n => n < 10 ? '0' + n : String(n);
+    function dateToKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+    function parseDateInput(dateStr) {
+        if (!dateStr) return null;
+        const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
+        if (isoDateOnly.test(dateStr)) {
+            const [y,m,d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+        const dt = new Date(dateStr);
+        return isNaN(dt) ? null : dt;
+    }
+    // --- /日付処理ヘルパー ---
+
     const userData = JSON.parse(localStorage.getItem('userData'));
     const token = localStorage.getItem('token');
 
@@ -31,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    dateSelect.value = new Date().toISOString().split('T')[0];
+    dateSelect.value = dateToKey(new Date());
 
     dateSelect.addEventListener('change', () => {
         loadStudentsAndRecords(dateSelect.value);
@@ -71,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const allRecords = await recordsResponse.json();
                 const targetRecord = allRecords.find(r => {
                     try {
-                        return new Date(r.date).toISOString().split('T')[0] === date;
+                        const recDate = parseDateInput(r.date);
+                        if (!recDate) return false;
+                        return dateToKey(recDate) === date;
                     } catch { return false; }
                 }) || null;
                 currentRecords.push({ student, record: targetRecord });
