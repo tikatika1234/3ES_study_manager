@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const classTitle = document.getElementById('classTitle');
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
+    const editRosterBtn = document.getElementById('editRosterBtn');
 
     let currentStudents = [];
     let currentRecords = [];
@@ -55,6 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
     submitAllCommentsBtn.addEventListener('click', async () => {
         await submitAllComments();
     });
+
+    if (editRosterBtn) {
+        editRosterBtn.addEventListener('click', () => {
+            window.location.href = 'teacheredit.html';
+        });
+    }
 
     const loadStudentsAndRecords = async (date) => {
         studentRecordsContainer.innerHTML = '<p style="grid-column: 1 / -1; padding: 20px; text-align: center;">読み込み中...</p>';
@@ -133,10 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const teacherComment = record?.teacher_comment || '';
             const recIdStr = isCommentable ? String(recordId) : '';
 
+            // 名簿番号表示を追加（生徒名の右）
+            const rosterDisplay = student?.roster !== undefined && student?.roster !== null && student?.roster !== '' ? ` <span class="roster">(#${escapeHtml(String(student.roster))})</span>` : '';
+
             return `
                 <div class="record-row" data-record-id="${recIdStr}">
                     <div class="col-student-list">
-                        ${escapeHtml(student.display_name || student.email || '')}
+                        ${escapeHtml(student.display_name || student.email || '')}${rosterDisplay}
                     </div>
                     <div class="col-study-record">
                         ${subjectsHtml}
