@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>名簿編集</title>
+<link rel="stylesheet" href="teacher.css">
+<style>
+/* 最小スタイル（必要に応じ teacher.css に統合してください） */
+body{font-family:Segoe UI,Meiryo,Arial,Helvetica,sans-serif;background:#f7f7f7;margin:0;padding:20px;}
+.container{max-width:1100px;margin:0 auto;background:#fff;padding:16px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.top-actions{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.top-actions button{padding:8px 10px;border:1px solid #ccc;background:#fafafa;border-radius:4px;cursor:pointer}
+.status{margin-left:8px;color:#333}
+.row{display:grid;grid-template-columns: 2fr 1fr 1fr 1fr 120px;gap:8px;align-items:center;padding:10px;border-bottom:1px solid #eee}
+.header-row{font-weight:600;background:#f0f0f0;border-radius:4px;padding:10px;margin-bottom:6px}
+.input-small{width:100%;box-sizing:border-box;padding:6px}
+.save-btn{padding:6px 10px;border:1px solid #2b7cff;background:#2b7cff;color:#fff;border-radius:4px;cursor:pointer}
+.empty-msg{padding:16px;color:#666}
+@media(max-width:800px){ .row, .header-row{grid-template-columns: 1.5fr 1fr 1fr 1fr 100px;font-size:14px} }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="top-actions">
+        <button id="backBtn" type="button">← 戻る</button>
+        <button id="reloadBtn" type="button">再読み込み</button>
+        <button id="saveAllBtn" type="button">一括保存</button>
+        <span id="statusMsg" class="status"></span>
+    </div>
+
+    <div class="header-row row">
+        <div>生徒名</div>
+        <div>学年</div>
+        <div>組</div>
+        <div>名簿番号</div>
+        <div>操作</div>
+    </div>
+
+    <div id="studentsList">
+        <div class="empty-msg">読み込み中...</div>
+    </div>
+</div>
+
+<script src="teacheredit.js"></script>
+</body>
+</html>
