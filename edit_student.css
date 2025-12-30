@@ -1,0 +1,160 @@
+/* 全体の基本設定 */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    background-color: #f0f0f0;
+    height: 100%;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-size: 18px;
+}
+
+/* -------------------- 上部：青色ヘッダー -------------------- */
+.settings-header {
+    background-color: #4e5eff; /* 画像に基づいた鮮やかな青 */
+    color: white;
+    padding: 20px 40px;
+    box-sizing: border-box;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.main-title {
+    margin: 0;
+    font-size: 24px;
+}
+
+.back-btn {
+    background-color: #c5e1a5; /* 薄い緑色のボタン */
+    color: #333;
+    text-decoration: none;
+    padding: 30px 40px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.sub-title {
+    font-size: 20px;
+    margin: 0 0 10px 0;
+}
+
+.class-tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.class-tab {
+    background: none;
+    border: 2px solid white;
+    color: white;
+    padding: 5px 25px;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.class-tab.active {
+    background-color: #00d2ff; /* 選択中の明るい水色 */
+    border-color: #00d2ff;
+}
+
+/* -------------------- メイン：白色編集エリア -------------------- */
+.edit-container {
+    background-color: white;
+    margin: 0 40px 40px 40px;
+    flex-grow: 1;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.edit-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.status-text {
+    font-size: 18px;
+    margin: 0;
+}
+
+.confirm-btn {
+    background-color: #ff0000; /* 赤色の確定ボタン */
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* テーブルスタイル */
+.edit-table-wrapper {
+    overflow-x: auto;
+}
+
+.edit-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.edit-table th {
+    background-color: #1abc9c; /* テーブルヘッダーの緑色 */
+    color: black;
+    padding: 15px;
+    font-size: 20px;
+    border: 1px solid #16a085;
+}
+
+.edit-table td {
+    padding: 15px;
+    border: 1px solid #1abc9c;
+    text-align: center;
+    font-size: 18px;
+}
+
+.student-name {
+    text-align: left !important;
+    padding-left: 30px !important;
+}
+
+/* 入力ボックスのグループ */
+.input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.box-input {
+    width: 60px;
+    padding: 10px;
+    font-size: 20px;
+    text-align: center;
+    border: 2px solid #ccc;
+    background-color: white;
+}
+
+.unit-text {
+    font-weight: bold;
+    font-size: 18px;
+}
