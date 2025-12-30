@@ -115,12 +115,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             statusMsg.textContent = '保存しました';
             setTimeout(()=> statusMsg.textContent = '', 1500);
+            return true; // 変更: 成功を返す
         } catch (e) {
             statusMsg.textContent = `エラー: ${e.message}`;
+            return false; // 変更: 失敗を返す
         }
     }
 
     async function saveAll() {
+        // 追加: 実行前確認ダイアログ
+        if (!confirm('一括保存を実行しますか？この操作は複数の生徒情報を更新します。よろしいですか？')) {
+            return;
+        }
+
         const rows = Array.from(document.querySelectorAll('.row'));
         if (rows.length === 0) return;
         saveAllBtn.disabled = true;
@@ -133,14 +140,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const rosterRaw = row.querySelector('.roster-input').value;
             const roster = rosterRaw === '' ? null : Number(rosterRaw);
             try {
-                await saveStudent(id, { grade: grade || null, class: classVal || null, roster });
-                success++;
+                const ok = await saveStudent(id, { grade: grade || null, class: classVal || null, roster });
+                if (ok) success++; else fail++;
             } catch {
                 fail++;
             }
         }
         saveAllBtn.disabled = false;
         statusMsg.textContent = `一括保存完了 成功:${success} 失敗:${fail}`;
+        // 追加: 最終警告（結果表示）
+        alert(`一括保存が完了しました。\n成功: ${success} 件\n失敗: ${fail} 件`);
         setTimeout(()=> statusMsg.textContent = '', 2000);
     }
 
