@@ -63,14 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayName = document.getElementById('signup-displayName').value;
         const grade = document.getElementById('signup-grade').value;
         const classNum = document.getElementById('signup-class').value;
+        // 追加: 名簿番号（任意）
+        const rosterValue = document.getElementById('signup-roster')?.value;
+        const roster = rosterValue !== undefined && rosterValue !== '' ? Number(rosterValue) : undefined;
 
         try {
+            const bodyPayload = { email, password, displayName, grade, class: classNum };
+            if (roster !== undefined) bodyPayload.roster = roster;
+
             const response = await fetch(`${API_URL}/api/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password, displayName, grade, class: classNum })
+                body: JSON.stringify(bodyPayload)
             });
 
             const data = await response.json();
