@@ -1,5 +1,4 @@
-// ...existing code...
-const API_URL = 'http://160.251.251.133:3000';
+const API_URL = 'http://163.44.113.224:3000';
 
 document.addEventListener('DOMContentLoaded', () => {
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -116,4 +115,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初期表示
     loadLatestRecord();
 });
-// ...existing code...
