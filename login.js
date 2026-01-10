@@ -56,6 +56,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 新規登録処理
+    // --- リアルタイム検証: パスワード一致・長さチェック ---
+    const signupPasswordInput = document.getElementById('signup-password');
+    const signupConfirmInput = document.getElementById('signup-password-confirm');
+    const signupMessage = document.getElementById('signup-password-message');
+    const signupSubmitBtn = document.getElementById('signup-submit');
+
+    const validateSignupPassword = () => {
+        const pwd = signupPasswordInput.value;
+        const cpwd = signupConfirmInput.value;
+        const minLen = 6;
+
+        if (!pwd && !cpwd) {
+            signupMessage.textContent = '';
+            signupMessage.className = 'text-sm mt-1';
+            signupSubmitBtn.disabled = true;
+            return;
+        }
+
+        if (pwd.length < minLen) {
+            signupMessage.textContent = `パスワードは最低 ${minLen} 文字必要です。`;
+            signupMessage.className = 'text-sm mt-1 text-red-600';
+            signupSubmitBtn.disabled = true;
+            return;
+        }
+
+        if (pwd !== cpwd) {
+            signupMessage.textContent = 'パスワードが一致しません。';
+            signupMessage.className = 'text-sm mt-1 text-red-600';
+            signupSubmitBtn.disabled = true;
+            return;
+        }
+
+        signupMessage.textContent = 'パスワードが一致しました。';
+        signupMessage.className = 'text-sm mt-1 text-green-600';
+        signupSubmitBtn.disabled = false;
+    };
+
+    signupPasswordInput.addEventListener('input', validateSignupPassword);
+    signupConfirmInput.addEventListener('input', validateSignupPassword);
+
+    // 初期評価
+    validateSignupPassword();
+
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('signup-email').value;

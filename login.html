@@ -99,7 +99,8 @@
                     <label for="signup-password-confirm" class="block text-gray-700 text-sm font-bold mb-2">パスワード（確認）</label>
                     <input type="password" id="signup-password-confirm" name="passwordConfirm" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
-                <button type="submit" class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <p id="signup-password-message" class="text-sm mt-1" aria-live="polite"></p>
+                <button type="submit" id="signup-submit" disabled class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                     登録
                 </button>
                 <p class="mt-4 text-center text-gray-600">
