@@ -1,4 +1,4 @@
-const API_URL = 'http://163.44.113.224:3000';
+const API_URL = '/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- 日付処理ヘルパー（ローカル日付ベース） ---
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recordCountElement.textContent = '';
         
         try {
-            const studentsResponse = await fetch(`${API_URL}/api/students`, {
+            const studentsResponse = await fetch(`${API_URL}/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!studentsResponse.ok) throw new Error('生徒一覧の取得に失敗しました');
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentRecords = [];
             for (const student of currentStudents) {
-                const recordsResponse = await fetch(`${API_URL}/api/records/${student.id}`, {
+                const recordsResponse = await fetch(`${API_URL}/records/${student.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!recordsResponse.ok) {
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const { recordId, comment } of commentsToSave) {
             try {
-                const response = await fetch(`${API_URL}/api/teacher-comment`, {
+                const response = await fetch(`${API_URL}/teacher-comment`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -226,30 +226,4 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const savedCheckbox = document.getElementById(`checkbox-${recordId}`);
-                if (savedCheckbox) savedCheckbox.checked = false;
-
-                successCount++;
-            } catch (error) {
-                console.error('エラー:', error);
-                failCount++;
-            }
-        }
-        
-        submitAllCommentsBtn.disabled = false;
-        submitAllCommentsBtn.textContent = '✅ チェック済みを保存';
-        
-        alert(`保存完了\n成功: ${successCount}件\n失敗: ${failCount}件`);
-    };
-
-    const escapeHtml = (str) => {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    };
-
-    loadStudentsAndRecords(dateSelect.value);
-});
+                if
