@@ -1,4 +1,4 @@
-const API_URL = 'http://163.44.113.224:3000';
+const API_URL = '/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadStudents() {
         studentsList.innerHTML = '<div style="padding:16px">読み込み中...</div>';
         try {
-            const res = await fetch(`${API_URL}/api/students`, {
+            const res = await fetch(`${API_URL}/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) throw new Error('生徒一覧の取得に失敗しました');
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveStudent(id, payload) {
         statusMsg.textContent = '保存中...';
         try {
-            const res = await fetch(`${API_URL}/api/students/${id}`, {
+            const res = await fetch(`${API_URL}/students/${id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
