@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = '/api';
     const weeklyView = document.getElementById('weeklyView');
     const dailyDetailView = document.getElementById('dailyDetailView');
     const detailDayTitle = document.getElementById('detailDayTitle');
@@ -67,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}/records/${userData.id}`, {
+            const res = await fetch(`/api/records/${userData.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) {
