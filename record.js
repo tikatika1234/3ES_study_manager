@@ -1,5 +1,3 @@
-const API_URL = '/api';
-
 document.addEventListener('DOMContentLoaded', () => {
     const userData = JSON.parse(localStorage.getItem('userData'));
     const token = localStorage.getItem('token');
@@ -69,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch(`${API_URL}/records`, {
+                const response = await fetch(`/api/records`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -98,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 記録の読み込み
     const loadRecords = async () => {
         try {
-            const response = await fetch(`${API_URL}/records/${userData.id}`, {
+            const response = await fetch(`/api/records/${userData.id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
