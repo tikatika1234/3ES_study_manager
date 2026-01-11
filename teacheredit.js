@@ -1,5 +1,3 @@
-const API_URL = '/api';
-
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const userData = JSON.parse(localStorage.getItem('userData'));
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadStudents() {
         studentsList.innerHTML = '<div style="padding:16px">読み込み中...</div>';
         try {
-            const res = await fetch(`${API_URL}/students`, {
+            const res = await fetch(`/api/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) throw new Error('生徒一覧の取得に失敗しました');
@@ -96,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveStudent(id, payload) {
         statusMsg.textContent = '保存中...';
         try {
-            const res = await fetch(`${API_URL}/students/${id}`, {
+            const res = await fetch(`/api/students/${id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
