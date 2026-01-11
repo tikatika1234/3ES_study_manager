@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 既にログイン済みならリダイレクト
     const existingUser = JSON.parse(localStorage.getItem('userData'));
     const existingToken = localStorage.getItem('token');
+    const loginBox = document.getElementById('loginBox');
+    const signupBox = document.getElementById('signupBox');
+
     if (existingUser && existingToken) {
         window.location.href = existingUser.role === 'teacher' ? 'teacher.html' : 'student_Home.html';
         return;
@@ -15,13 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // フォーム切り替え
     if (showSignupBtn && showLoginBtn) {
         showSignupBtn.addEventListener('click', () => {
-            loginForm.classList.add('hidden');
-            signupForm.classList.remove('hidden');
+            loginBox.classList.add('hidden');
+            signupBox.classList.remove('hidden');
         });
 
         showLoginBtn.addEventListener('click', () => {
-            signupForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
+            signupBox.classList.add('hidden');
+            loginBox.classList.remove('hidden');
         });
     }
 
