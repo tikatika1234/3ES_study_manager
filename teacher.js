@@ -1,5 +1,3 @@
-const API_URL = '/api';
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- 日付処理ヘルパー（ローカル日付ベース） ---
     const pad = n => n < 10 ? '0' + n : String(n);
@@ -68,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recordCountElement.textContent = '';
         
         try {
-            const studentsResponse = await fetch(`${API_URL}/students`, {
+            const studentsResponse = await fetch(`/api/students`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!studentsResponse.ok) throw new Error('生徒一覧の取得に失敗しました');
@@ -83,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentRecords = [];
             for (const student of currentStudents) {
-                const recordsResponse = await fetch(`${API_URL}/records/${student.id}`, {
+                const recordsResponse = await fetch(`/api/records/${student.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!recordsResponse.ok) {
@@ -207,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const { recordId, comment } of commentsToSave) {
             try {
-                const response = await fetch(`${API_URL}/teacher-comment`, {
+                const response = await fetch(`/api/teacher-comment`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -226,4 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const savedCheckbox = document.getElementById(`checkbox-${recordId}`);
-                if
+                if (savedCheckbox) {
+                    savedCheckbox.checked = true;
+                }
+
+                successCount++;
+            } catch (error) {
+                console.error(`Record ID ${recordId} のコメント保存に失敗:`, error);
+                failCount++;
+            }
+        }
+
+        submitAllCommentsBtn.disabled = false;
+        submitAllCommentsBtn.textContent = `全件保存 (${successCount}件成功, ${failCount}件失敗)`;
+
+        setTimeout(() => {
+            submitAllCommentsBtn.textContent = 'コメントを一括保存';
+        }, 3000);
+    };
+});
