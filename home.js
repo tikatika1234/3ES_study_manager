@@ -1,5 +1,3 @@
-const API_URL = 'http://163.44.113.224:3000';
-
 document.addEventListener('DOMContentLoaded', () => {
     const userData = JSON.parse(localStorage.getItem('userData'));
     const token = localStorage.getItem('token');
@@ -59,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 最新記録を取得して record-table の要素に反映
     const loadLatestRecord = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/records/${userData.id}`, {
+            const res = await fetch(`/api/records/${userData.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
