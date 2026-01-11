@@ -1,5 +1,3 @@
-const API_URL = '/api';
-
 document.addEventListener('DOMContentLoaded', () => {
     // 既にログイン済みならリダイレクト
     const existingUser = JSON.parse(localStorage.getItem('userData'));
@@ -34,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('login-password').value;
 
         try {
-            const response = await fetch(`${API_URL}/login`, {
+            const response = await fetch(`/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const bodyPayload = { email, password, displayName, grade, class: classNum };
             if (roster !== undefined) bodyPayload.roster = roster;
 
-            const response = await fetch(`${API_URL}/signup`, {
+            const response = await fetch(`/api/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
