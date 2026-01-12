@@ -140,9 +140,9 @@ app.post('/api/records', authenticateToken, async (req, res) => {
       : JSON.stringify(subjects);
 
     await pool.query(
-      `INSERT INTO records (user_id, date, subjects, comment, comment_type)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [req.user.userId, date, subjectsJson, comment || null, commentType || null]
+      `INSERT INTO records (user_id, date, subjects, comment)
+       VALUES ($1, $2, $3, $4)`,
+      [req.user.userId, date, subjectsJson, comment || null]
     );
 
     res.json({ success: true });
@@ -163,7 +163,7 @@ app.get('/api/records/:userId', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: '権限がありません' });
 
     const result = await pool.query(
-      `SELECT id, user_id, date, subjects, comment, comment_type, teacher_comment, created_at
+      `SELECT id, user_id, date, subjects, comment, teacher_comment, created_at
        FROM records WHERE user_id = $1 ORDER BY date DESC`,
       [userId]
     );

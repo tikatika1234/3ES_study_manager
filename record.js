@@ -143,9 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="p-4 bg-white border rounded shadow-sm">
                     <div class="flex justify-between items-center mb-2">
                         <div class="text-sm text-gray-500">日付: ${new Date(record.date).toLocaleDateString()}</div>
-                        <div class="text-xs px-2 py-1 rounded ${record.comment_type === 'good' ? 'bg-green-100 text-green-700' : record.comment_type === 'bad' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">
-                            ${escapeHtml(record.comment_type || 'normal')}
-                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         ${subjectsHtml}
