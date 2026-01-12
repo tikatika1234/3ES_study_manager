@@ -26,9 +26,13 @@ console.log("🔌 DB接続先:", connectionString);
 
 // SSLはオフ
 const pool = new Pool({
-  connectionString,
-  ssl: false
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false,
+  },
 });
+
 
 app.use(cors());
 app.use(express.json());
