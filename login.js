@@ -1,10 +1,9 @@
+const API_URL = 'https://threees-study-manager.onrender.com';
+
 document.addEventListener('DOMContentLoaded', () => {
     // 既にログイン済みならリダイレクト
     const existingUser = JSON.parse(localStorage.getItem('userData'));
     const existingToken = localStorage.getItem('token');
-    const loginBox = document.getElementById('loginBox');
-    const signupBox = document.getElementById('signupBox');
-
     if (existingUser && existingToken) {
         window.location.href = existingUser.role === 'teacher' ? 'teacher.html' : 'student_Home.html';
         return;
@@ -18,13 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // フォーム切り替え
     if (showSignupBtn && showLoginBtn) {
         showSignupBtn.addEventListener('click', () => {
-            loginBox.classList.add('hidden');
-            signupBox.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
         });
 
         showLoginBtn.addEventListener('click', () => {
-            signupBox.classList.add('hidden');
-            loginBox.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
         });
     }
 
@@ -35,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('login-password').value;
 
         try {
-            const response = await fetch(`/api/login`, {
+            const response = await fetch(`${API_URL}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -57,27 +56,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 新規登録処理
+    // --- リアルタイム検証: パスワード一致・長さチェック ---
+    const signupPasswordInput = document.getElementById('signup-password');
+    const signupConfirmInput = document.getElementById('signup-password-confirm');
+    const signupMessage = document.getElementById('signup-password-message');
+    const signupSubmitBtn = document.getElementById('signup-submit');
+
+    const validateSignupPassword = () => {
+        const pwd = signupPasswordInput.value;
+        const cpwd = signupConfirmInput.value;
+        const minLen = 6;
+
+        if (!pwd && !cpwd) {
+            signupMessage.textContent = '';
+            signupMessage.className = 'text-sm mt-1';
+            signupSubmitBtn.disabled = true;
+            return;
+        }
+
+        if (pwd.length < minLen) {
+            signupMessage.textContent = `パスワードは最低 ${minLen} 文字必要です。`;
+            signupMessage.className = 'text-sm mt-1 text-red-600';
+            signupSubmitBtn.disabled = true;
+            return;
+        }
+
+        if (pwd !== cpwd) {
+            signupMessage.textContent = 'パスワードが一致しません。';
+            signupMessage.className = 'text-sm mt-1 text-red-600';
+            signupSubmitBtn.disabled = true;
+            return;
+        }
+
+        signupMessage.textContent = 'パスワードが一致しました。';
+        signupMessage.className = 'text-sm mt-1 text-green-600';
+        signupSubmitBtn.disabled = false;
+    };
+
+    signupPasswordInput.addEventListener('input', validateSignupPassword);
+    signupConfirmInput.addEventListener('input', validateSignupPassword);
+
+    // 初期評価
+    validateSignupPassword();
+
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
+        const confirmPassword = document.getElementById('signup-password-confirm').value;
         const displayName = document.getElementById('signup-displayName').value;
         const grade = document.getElementById('signup-grade').value;
         const classNum = document.getElementById('signup-class').value;
-        // 追加: 名簿番号（任意）
-        const rosterValue = document.getElementById('signup-roster')?.value;
-        const roster = rosterValue !== undefined && rosterValue !== '' ? Number(rosterValue) : undefined;
+
+        if (password !== confirmPassword) {
+            alert('パスワードが一致しません。確認のため同じパスワードを入力してください。');
+            return;
+        }
 
         try {
-            const bodyPayload = { email, password, displayName, grade, class: classNum };
-            if (roster !== undefined) bodyPayload.roster = roster;
-
-            const response = await fetch(`/api/signup`, {
+            const response = await fetch(`${API_URL}/api/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(bodyPayload)
+                body: JSON.stringify({ email, password, displayName, grade, class: classNum })
             });
 
             const data = await response.json();
