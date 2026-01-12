@@ -1,4 +1,4 @@
-const API_URL = 'http://163.44.113.224:3000';
+const API_URL = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 既にログイン済みならリダイレクト
