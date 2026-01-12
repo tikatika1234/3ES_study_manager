@@ -19,7 +19,7 @@ let connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
   console.warn("⚠️  DATABASE_URL が見つからないためフォールバックを使用します");
-  connectionString = "postgresql://postgres:postgres@localhost:5432/study_manager";
+  connectionString = "postgresql://study_user:2012son@localhost:5432/study_manager";
 }
 
 // 🔑 localhost 判定
