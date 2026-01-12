@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const classTitle = document.getElementById('classTitle');
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
-    const editRosterBtn = document.getElementById('editRosterBtn');
 
     let currentStudents = [];
     let currentRecords = [];
@@ -61,12 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     submitAllCommentsBtn.addEventListener('click', async () => {
         await submitAllComments();
     });
-
-    if (editRosterBtn) {
-        editRosterBtn.addEventListener('click', () => {
-            window.location.href = 'teacheredit.html';
-        });
-    }
 
     const loadStudentsAndRecords = async (date) => {
         studentRecordsContainer.innerHTML = '<p style="grid-column: 1 / -1; padding: 20px; text-align: center;">読み込み中...</p>';
