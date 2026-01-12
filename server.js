@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 ----------------------------------------------------- */
 
 // .env に DATABASE_URL がある場合 → そのまま使用
-// ない場合 → フォールバック（postgres:postgres）
+// ない場合 → フォールバック（localhost）
 let connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -22,17 +22,20 @@ if (!connectionString) {
   connectionString = "postgresql://postgres:postgres@localhost:5432/study_manager";
 }
 
-console.log("🔌 DB接続先:", connectionString);
+// 🔑 localhost 判定
+const isLocal =
+  connectionString.includes("localhost") ||
+  connectionString.includes("127.0.0.1");
 
+console.log("🔌 DB接続先:", connectionString);
+console.log("🔐 SSL:", isLocal ? "OFF (local)" : "ON (production)");
+
+// ✅ ここが一番重要
 const pool = new Pool({
-  connectionString: connectionString, // ← ここ重要
-  ssl: {
-    require: true,
-    rejectUnauthorized: false,
-  },
-  max: 5,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  connectionString,
+  ssl: isLocal
+    ? false
+    : { rejectUnauthorized: false },
 });
 
 
