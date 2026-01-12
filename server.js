@@ -24,13 +24,15 @@ if (!connectionString) {
 
 console.log("🔌 DB接続先:", connectionString);
 
-// SSLはオフ
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString, // ← ここ重要
   ssl: {
     require: true,
     rejectUnauthorized: false,
   },
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
 
