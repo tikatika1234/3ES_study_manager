@@ -65,17 +65,17 @@ const authenticateToken = (req, res, next) => {
 ----------------------------------------------------- */
 app.post('/api/signup', async (req, res) => {
   try {
-    const { email, password, displayName, role, grade, class: classNum } = req.body;
+    const { email, password, displayName, role, grade, class: classNum, studentNumber } = req.body;
     if (!email || !password)
       return res.status(400).json({ error: 'email と password が必要です' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      `INSERT INTO users (email, password_hash, display_name, role, grade, class)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, email, display_name, role, grade, class`,
-      [email, hashedPassword, displayName || null, role || 'student', grade || null, classNum || null]
+      `INSERT INTO users (email, password_hash, display_name, role, grade, class, student_number)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, email, display_name, role, grade, class, student_number`,
+      [email, hashedPassword, displayName || null, role || 'student', grade || null, classNum || null, studentNumber || null]
     );
 
     res.json({ success: true, user: result.rows[0] });
@@ -98,7 +98,7 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'email と password が必要です' });
 
     const result = await pool.query(
-      'SELECT id, email, password_hash, display_name, role, grade, class FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, display_name, role, grade, class, student_number FROM users WHERE email = $1',
       [email]
     );
 
@@ -125,7 +125,8 @@ app.post('/api/login', async (req, res) => {
         role: user.role,
         displayName: user.display_name,
         grade: user.grade,
-        class: user.class
+        class: user.class,
+        studentNumber: user.student_number
       }
     });
   } catch (error) {
