@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- /日付処理ヘルパー ---
 
+    // --- HTML エスケープヘルパー ---
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    // --- /HTML エスケープヘルパー ---
+
     const userData = JSON.parse(localStorage.getItem('userData'));
     const token = localStorage.getItem('token');
 
