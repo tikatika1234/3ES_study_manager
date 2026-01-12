@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupConfirmInput = document.getElementById('signup-password-confirm');
     const signupMessage = document.getElementById('signup-password-message');
     const signupSubmitBtn = document.getElementById('signup-submit');
+    const signupStudentNumberInput = document.getElementById('signup-studentNumber');
 
     const validateSignupPassword = () => {
         const pwd = signupPasswordInput.value;
@@ -107,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayName = document.getElementById('signup-displayName').value;
         const grade = document.getElementById('signup-grade').value;
         const classNum = document.getElementById('signup-class').value;
+        const studentNumber = document.getElementById('signup-studentNumber').value;
 
         if (password !== confirmPassword) {
             alert('パスワードが一致しません。確認のため同じパスワードを入力してください。');
@@ -119,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password, displayName, grade, class: classNum })
+                body: JSON.stringify({ email, password, displayName, grade, class: classNum, studentNumber })
             });
 
             const data = await response.json();
