@@ -239,14 +239,14 @@ app.get('/api/students', authenticateToken, async (req, res) => {
 
     if (req.user.grade != null && req.user.class != null) {
       const result = await pool.query(
-        'SELECT id, email, display_name, grade, class FROM users WHERE role = $1 AND grade = $2 AND class = $3',
+        'SELECT id, email, display_name, grade, class, student_number FROM users WHERE role = $1 AND grade = $2 AND class = $3',
         ['student', req.user.grade, req.user.class]
       );
       return res.json(result.rows);
     }
 
     const result = await pool.query(
-      'SELECT id, email, display_name, grade, class FROM users WHERE role = $1',
+      'SELECT id, email, display_name, grade, class, student_number FROM users WHERE role = $1',
       ['student']
     );
 

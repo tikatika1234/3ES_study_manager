@@ -83,10 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // レコードをソート
     const sortRecords = () => {
         currentRecords.sort((a, b) => {
-            const rosterA = a.student?.roster;
-            const rosterB = b.student?.roster;
+            const rosterA = a.student?.student_number;
+            const rosterB = b.student?.student_number;
             
-            // roster が存在しない場合は最後に配置
+            // student_number が存在しない場合は最後に配置
             if (rosterA === undefined || rosterA === null || rosterA === '') {
                 return 1;
             }
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const teacherComment = record?.teacher_comment || '';
             const recIdStr = isCommentable ? String(recordId) : '';
 
-            const rosterDisplay = student?.roster !== undefined && student?.roster !== null && student?.roster !== '' ? ` <span class="roster">(#${escapeHtml(String(student.roster))})</span>` : '';
+            const rosterDisplay = student?.student_number !== undefined && student?.student_number !== null && student?.student_number !== '' ? ` <span class="roster">(#${escapeHtml(String(student.student_number))})</span>` : '';
 
             return `
                 <div class="record-row" data-record-id="${recIdStr}">
