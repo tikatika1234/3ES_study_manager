@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentStudents = [];
     let currentRecords = [];
-    let currentSortOrder = 'roster-asc'; // 'roster-asc' | 'roster-desc' | 'updated'
+    let currentSortOrder = localStorage.getItem('teacherSortOrder') || 'roster-asc';
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dateSelect.addEventListener('change', () => {
         currentSortOrder = 'roster-asc';
-        sortBtn.textContent = '📋 名簿順';
+        localStorage.setItem('teacherSortOrder', 'roster-asc');
+        updateSortButtonText();
         loadStudentsAndRecords(dateSelect.value);
     });
 
@@ -65,62 +66,62 @@ document.addEventListener('DOMContentLoaded', () => {
         await submitAllComments();
     });
 
-    sortBtn.addEventListener('click', () => {
-        const orders = ['roster-asc', 'roster-desc', 'updated'];
-        const currentIndex = orders.indexOf(currentSortOrder);
-        const nextIndex = (currentIndex + 1) % orders.length;
-        currentSortOrder = orders[nextIndex];
-
+    const updateSortButtonText = () => {
         const sortLabels = {
             'roster-asc': '📋 名簿順（早い順）',
             'roster-desc': '📋 名簿順（遅い順）',
             'updated': '📋 更新順'
         };
-        sortBtn.textContent = sortLabels[currentSortOrder];
+        sortBtn.textContent = sortLabels[currentSortOrder] || '📋 名簿順';
+    };
+
+    sortBtn.addEventListener('click', () => {
+        const orders = ['roster-asc', 'roster-desc', 'updated'];
+        const currentIndex = orders.indexOf(currentSortOrder);
+        const nextIndex = (currentIndex + 1) % orders.length;
+        currentSortOrder = orders[nextIndex];
         
+        localStorage.setItem('teacherSortOrder', currentSortOrder);
+        updateSortButtonText();
         displayRecords(currentRecords);
     });
 
+    // ページロード時にボタンテキストを初期化
+    updateSortButtonText();
+
     const sortRecords = (records) => {
+        if (!records || records.length === 0) return records;
+        
         const sorted = [...records];
         
-        if (currentSortOrder === 'roster-asc') {
-            sorted.sort((a, b) => {
-                const rosterA = a.student?.roster;
-                const rosterB = b.student?.roster;
-                
-                // nullの場合は一番下に
-                if (rosterA === null || rosterA === undefined) return 1;
-                if (rosterB === null || rosterB === undefined) return -1;
-                
-                return Number(rosterA) - Number(rosterB);
-            });
-        } else if (currentSortOrder === 'roster-desc') {
-            sorted.sort((a, b) => {
-                const rosterA = a.student?.roster;
-                const rosterB = b.student?.roster;
-                
-                // nullの場合は一番下に
-                if (rosterA === null || rosterA === undefined) return 1;
-                if (rosterB === null || rosterB === undefined) return -1;
-                
-                return Number(rosterB) - Number(rosterA);
-            });
-        } else if (currentSortOrder === 'updated') {
-            sorted.sort((a, b) => {
-                const rosterA = a.student?.roster;
-                const rosterB = b.student?.roster;
-                
-                // nullの場合は一番下に
-                if (rosterA === null || rosterA === undefined) return 1;
-                if (rosterB === null || rosterB === undefined) return -1;
-                
-                const dateA = new Date(a.record?.updated_at || 0);
-                const dateB = new Date(b.record?.updated_at || 0);
+        const compareFunc = (a, b) => {
+            const rosterA = a.student?.roster;
+            const rosterB = b.student?.roster;
+            
+            const isNullA = rosterA === null || rosterA === undefined;
+            const isNullB = rosterB === null || rosterB === undefined;
+            
+            if (isNullA && isNullB) return 0;
+            if (isNullA) return 1;
+            if (isNullB) return -1;
+            
+            const numA = Number(rosterA);
+            const numB = Number(rosterB);
+            
+            if (currentSortOrder === 'roster-asc') {
+                return numA - numB;
+            } else if (currentSortOrder === 'roster-desc') {
+                return numB - numA;
+            } else if (currentSortOrder === 'updated') {
+                const dateA = new Date(a.record?.updated_at || 0).getTime();
+                const dateB = new Date(b.record?.updated_at || 0).getTime();
                 return dateB - dateA;
-            });
-        }
+            }
+            
+            return 0;
+        };
         
+        sorted.sort(compareFunc);
         return sorted;
     };
 
