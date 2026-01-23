@@ -282,6 +282,65 @@ app.post('/api/teacher-comment', authenticateToken, async (req, res) => {
 });
 
 /* ---------------------------------------------------
+   勉強記録合戦用API：期間別学習時間統計取得
+----------------------------------------------------- */
+app.get('/api/battle-stats', authenticateToken, async (req, res) => {
+  try {
+    const { startDate, endDate, studentId } = req.query;
+
+    if (!startDate || !endDate || !studentId)
+      return res.status(400).json({ error: 'startDate, endDate, studentId が必要です' });
+
+    // 権限チェック：本人か教師のみ
+    if (req.user.role !== 'teacher' && Number(req.user.userId) !== Number(studentId))
+      return res.status(403).json({ error: '権限がありません' });
+
+    // 期間内のすべての記録を取得
+    const result = await pool.query(
+      `SELECT date, subjects FROM records 
+       WHERE user_id = $1 AND date >= $2 AND date <= $3 
+       ORDER BY date ASC`,
+      [studentId, startDate, endDate]
+    );
+
+    const records = result.rows;
+    let totalMinutes = 0;
+    const subjectBreakdown = {};
+
+    // 各記録のsubjectsを解析して合計を計算
+    records.forEach(record => {
+      let subjects = record.subjects;
+      
+      // JSON文字列の場合はパース
+      if (typeof subjects === 'string') {
+        try {
+          subjects = JSON.parse(subjects);
+        } catch (e) {
+          subjects = {};
+        }
+      }
+
+      // 科目ごとの時間を加算
+      Object.entries(subjects || {}).forEach(([subject, minutes]) => {
+        const mins = parseInt(minutes, 10) || 0;
+        totalMinutes += mins;
+        subjectBreakdown[subject] = (subjectBreakdown[subject] || 0) + mins;
+      });
+    });
+
+    res.json({
+      totalMinutes,
+      subjectBreakdown,
+      recordCount: records.length
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ---------------------------------------------------
    サーバー起動
 ----------------------------------------------------- */
 app.listen(PORT, '0.0.0.0', () => {

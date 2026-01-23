@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勉強記録合戦</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        
+        #battleTitle {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        #backBtn {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        #backBtn:hover {
+            background-color: #5a6268;
+        }
+        
+        #logoutBtn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        #logoutBtn:hover {
+            background-color: #c82333;
+        }
+        
+        .period-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        #fetchBtn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        #fetchBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        #fetchBtn:active {
+            transform: translateY(0);
+        }
+        
+        #resultContainer {
+            margin-top: 20px;
+        }
+        
+        .result-content {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-content h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .result-content p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        details {
+            cursor: pointer;
+        }
+        
+        details summary {
+            user-select: none;
+            color: #667eea;
+            font-weight: 600;
+            padding: 8px 0;
+        }
+        
+        details summary:hover {
+            text-decoration: underline;
+        }
+        
+        .note {
+            margin-top: 20px;
+            padding: 12px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #856404;
+        }
+    </style>
+    <script src="battle.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="battleTitle">勉強記録合戦（仮）</h1>
+            <div class="header-buttons">
+                <button id="backBtn">戻る</button>
+                <button id="logoutBtn">ログアウト</button>
+            </div>
+        </div>
+
+        <div class="period-form" id="periodForm">
+            <div class="form-group">
+                <label>期間設定</label>
+                <div class="date-inputs">
+                    <div>
+                        <label style="font-weight: 400; font-size: 12px; margin-bottom: 5px;">開始日</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div>
+                        <label style="font-weight: 400; font-size: 12px; margin-bottom: 5px;">終了日</label>
+                        <input type="date" id="endDate" required>
+                    </div>
+                </div>
+            </div>
+            <button id="fetchBtn">成績を見る</button>
+        </div>
+
+        <div id="resultContainer"></div>
+
+        <div class="note">
+            このページはまだ準備中です。HTML・CSSはまもなく反映されます。
+        </div>
+    </div>
+</body>
+</html>
