@@ -36,11 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const classTitle = document.getElementById('classTitle');
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
-    const sortBtn = document.getElementById('sortBtn');
+    const sortExecuteBtn = document.getElementById('sortExecuteBtn');
+    const sortTypeRadios = document.querySelectorAll('input[name="sortType"]');
 
     let currentStudents = [];
     let currentRecords = [];
-    let currentSortOrder = localStorage.getItem('teacherSortOrder') || 'roster-asc';
+    let currentSortOrder = 'roster-asc';
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -57,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dateSelect.addEventListener('change', () => {
         currentSortOrder = 'roster-asc';
-        localStorage.setItem('teacherSortOrder', 'roster-asc');
-        updateSortButtonText();
+        document.querySelector('input[name="sortType"][value="roster-asc"]').checked = true;
         loadStudentsAndRecords(dateSelect.value);
     });
 
@@ -66,28 +66,29 @@ document.addEventListener('DOMContentLoaded', () => {
         await submitAllComments();
     });
 
-    const updateSortButtonText = () => {
-        const sortLabels = {
-            'roster-asc': '📋 名簿順（早い順）',
-            'roster-desc': '📋 名簿順（遅い順）',
-            'updated': '📋 更新順'
-        };
-        sortBtn.textContent = sortLabels[currentSortOrder] || '📋 名簿順';
-    };
-
-    sortBtn.addEventListener('click', () => {
-        const orders = ['roster-asc', 'roster-desc', 'updated'];
-        const currentIndex = orders.indexOf(currentSortOrder);
-        const nextIndex = (currentIndex + 1) % orders.length;
-        currentSortOrder = orders[nextIndex];
-        
-        localStorage.setItem('teacherSortOrder', currentSortOrder);
-        updateSortButtonText();
-        displayRecords(currentRecords);
+    sortTypeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            currentSortOrder = e.target.value;
+        });
     });
 
-    // ページロード時にボタンテキストを初期化
-    updateSortButtonText();
+    sortExecuteBtn.addEventListener('click', () => {
+        if (!currentRecords || currentRecords.length === 0) {
+            alert('ソート対象の記録がありません。');
+            return;
+        }
+
+        const selectedSortType = document.querySelector('input[name="sortType"]:checked');
+        if (selectedSortType) {
+            currentSortOrder = selectedSortType.value;
+        }
+
+        displayRecords(currentRecords);
+        
+        setTimeout(() => {
+            alert('ソートが完了しました！');
+        }, 300);
+    });
 
     const sortRecords = (records) => {
         if (!records || records.length === 0) return records;

@@ -24,7 +24,18 @@
 
             <div class="header-actions">
                 <span id="recordCount"></span>
-                <button class="sort-btn" id="sortBtn">📋 名簿順</button>
+                <div class="sort-controls">
+                    <label class="sort-option-label">
+                        <input type="radio" name="sortType" value="roster-asc" checked> 名簿順（早い順）
+                    </label>
+                    <label class="sort-option-label">
+                        <input type="radio" name="sortType" value="roster-desc"> 名簿順（遅い順）
+                    </label>
+                    <label class="sort-option-label">
+                        <input type="radio" name="sortType" value="updated"> 更新順
+                    </label>
+                    <button class="sort-execute-btn" id="sortExecuteBtn">🔄 ソート開始</button>
+                </div>
                 <button class="submit-btn" id="submitAllCommentsBtn">✅ チェック済みを保存</button>
             </div>
 

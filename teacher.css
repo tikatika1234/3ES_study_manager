@@ -290,6 +290,48 @@ main {
     border-radius: 0 0 4px 4px;
 }
 
+/* ソート選択UI */
+.sort-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.sort-option-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.sort-option-label input[type="radio"] {
+    cursor: pointer;
+    margin: 0;
+}
+
+.sort-execute-btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.sort-execute-btn:hover {
+    background-color: #45a049;
+}
+
+.sort-execute-btn:active {
+    background-color: #3d8b40;
+}
+
 /* レスポンシブ */
 @media (max-width: 1200px) {
     .record-table-header,
