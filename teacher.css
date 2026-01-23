@@ -253,6 +253,43 @@ main {
     font-style: italic;
 }
 
+/* ドロップダウンメニュー */
+.sort-dropdown-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.sort-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 5px;
+}
+
+.sort-option {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.sort-option:hover {
+    background-color: #f0f0f0;
+}
+
+.sort-option:first-child {
+    border-radius: 4px 4px 0 0;
+}
+
+.sort-option:last-child {
+    border-radius: 0 0 4px 4px;
+}
+
 /* レスポンシブ */
 @media (max-width: 1200px) {
     .record-table-header,

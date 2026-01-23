@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
     const sortBtn = document.getElementById('sortBtn');
+    const sortDropdown = document.getElementById('sortDropdown');
+    const sortOptions = document.querySelectorAll('.sort-option');
 
     let currentStudents = [];
     let currentRecords = [];
@@ -64,37 +66,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     sortBtn.addEventListener('click', () => {
-        cycleSortOrder();
-        displayRecords(currentRecords);
+        sortDropdown.style.display = sortDropdown.style.display === 'none' ? 'block' : 'none';
     });
 
-    const cycleSortOrder = () => {
-        const orders = ['roster-asc', 'roster-desc', 'updated'];
-        const currentIndex = orders.indexOf(currentSortOrder);
-        const nextIndex = (currentIndex + 1) % orders.length;
-        currentSortOrder = orders[nextIndex];
+    sortOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const sortType = option.dataset.sort;
+            currentSortOrder = sortType;
+            
+            const sortLabels = {
+                'roster-asc': '📋 名簿順（早い順）',
+                'roster-desc': '📋 名簿順（遅い順）',
+                'updated': '📋 更新順'
+            };
+            sortBtn.textContent = sortLabels[currentSortOrder];
+            sortDropdown.style.display = 'none';
+            
+            displayRecords(currentRecords);
+        });
+    });
 
-        const sortLabels = {
-            'roster-asc': '📋 名簿順（早い順）',
-            'roster-desc': '📋 名簿順（遅い順）',
-            'updated': '📋 更新順'
-        };
-        sortBtn.textContent = sortLabels[currentSortOrder];
-    };
+    document.addEventListener('click', (e) => {
+        const sortWrapper = document.querySelector('.sort-dropdown-wrapper');
+        if (sortWrapper && !sortWrapper.contains(e.target)) {
+            sortDropdown.style.display = 'none';
+        }
+    });
 
     const sortRecords = (records) => {
         const sorted = [...records];
         
         if (currentSortOrder === 'roster-asc') {
             sorted.sort((a, b) => {
-                const rosterA = a.student?.roster ?? Infinity;
-                const rosterB = b.student?.roster ?? Infinity;
+                const rosterA = a.student?.roster !== undefined && a.student?.roster !== null ? Number(a.student.roster) : Infinity;
+                const rosterB = b.student?.roster !== undefined && b.student?.roster !== null ? Number(b.student.roster) : Infinity;
                 return rosterA - rosterB;
             });
         } else if (currentSortOrder === 'roster-desc') {
             sorted.sort((a, b) => {
-                const rosterA = a.student?.roster ?? -Infinity;
-                const rosterB = b.student?.roster ?? -Infinity;
+                const rosterA = a.student?.roster !== undefined && a.student?.roster !== null ? Number(a.student.roster) : -Infinity;
+                const rosterB = b.student?.roster !== undefined && b.student?.roster !== null ? Number(b.student.roster) : -Infinity;
                 return rosterB - rosterA;
             });
         } else if (currentSortOrder === 'updated') {
