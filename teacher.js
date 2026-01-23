@@ -37,8 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
     const sortBtn = document.getElementById('sortBtn');
-    const sortDropdown = document.getElementById('sortDropdown');
-    const sortOptions = document.querySelectorAll('.sort-option');
 
     let currentStudents = [];
     let currentRecords = [];
@@ -81,30 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sortBtn.textContent = sortLabels[currentSortOrder];
         
         displayRecords(currentRecords);
-    });
-
-    sortOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const sortType = option.dataset.sort;
-            currentSortOrder = sortType;
-            
-            const sortLabels = {
-                'roster-asc': '📋 名簿順（早い順）',
-                'roster-desc': '📋 名簿順（遅い順）',
-                'updated': '📋 更新順'
-            };
-            sortBtn.textContent = sortLabels[currentSortOrder];
-            sortDropdown.style.display = 'none';
-            
-            displayRecords(currentRecords);
-        });
-    });
-
-    document.addEventListener('click', (e) => {
-        const sortWrapper = document.querySelector('.sort-dropdown-wrapper');
-        if (sortWrapper && !sortWrapper.contains(e.target)) {
-            sortDropdown.style.display = 'none';
-        }
     });
 
     const sortRecords = (records) => {
