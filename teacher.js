@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentStudents = [];
     let currentRecords = [];
-    let sortState = { column: 0, ascending: true };
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -55,66 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
     dateSelect.value = dateToKey(new Date());
 
     dateSelect.addEventListener('change', () => {
-        sortState = { column: 0, ascending: true };
         loadStudentsAndRecords(dateSelect.value);
     });
 
     submitAllCommentsBtn.addEventListener('click', async () => {
         await submitAllComments();
     });
-
-    // テーブルをソートする関数
-    const sortTable = (records, ascending) => {
-        const sorted = [...records].sort((a, b) => {
-            const aNum = a.student?.studentNumber !== null && a.student?.studentNumber !== undefined 
-                ? Number(a.student.studentNumber) 
-                : Infinity;
-            const bNum = b.student?.studentNumber !== null && b.student?.studentNumber !== undefined 
-                ? Number(b.student.studentNumber) 
-                : Infinity;
-            
-            return ascending ? aNum - bNum : bNum - aNum;
-        });
-        return sorted;
-    };
-
-    // ソート矢印のリセット
-    const resetSortIndicators = () => {
-        const headers = document.querySelectorAll('.sort-header');
-        headers.forEach(header => {
-            header.classList.remove('sorted-asc', 'sorted-desc');
-        });
-    };
-
-    // ヘッダークリックイベント
-    const setupSortHeaders = () => {
-        const headers = document.querySelectorAll('.sort-header');
-        headers.forEach(header => {
-            header.removeEventListener('click', null);
-            header.addEventListener('click', () => {
-                const isCurrentlySorted = header.classList.contains('sorted-asc') || 
-                                         header.classList.contains('sorted-desc');
-                
-                if (isCurrentlySorted && header.classList.contains('sorted-asc')) {
-                    sortState.ascending = false;
-                } else {
-                    sortState.ascending = true;
-                }
-
-                resetSortIndicators();
-                
-                const sortedRecords = sortTable(currentRecords, sortState.ascending);
-                currentRecords = sortedRecords;
-                displayRecords(currentRecords);
-
-                if (sortState.ascending) {
-                    header.classList.add('sorted-asc');
-                } else {
-                    header.classList.add('sorted-desc');
-                }
-            });
-        });
-    };
 
     const loadStudentsAndRecords = async (date) => {
         studentRecordsContainer.innerHTML = '<p style="grid-column: 1 / -1; padding: 20px; text-align: center;">読み込み中...</p>';
@@ -221,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
 
         studentRecordsContainer.innerHTML = rows;
-        setupSortHeaders();
     };
 
     const submitAllComments = async () => {
