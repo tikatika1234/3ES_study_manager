@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
     dateSelect.value = dateToKey(new Date());
 
     dateSelect.addEventListener('change', () => {
+        currentSortOrder = 'roster-asc';
+        sortBtn.textContent = '📋 名簿順';
         loadStudentsAndRecords(dateSelect.value);
     });
 
@@ -66,7 +68,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     sortBtn.addEventListener('click', () => {
-        sortDropdown.style.display = sortDropdown.style.display === 'none' ? 'block' : 'none';
+        const orders = ['roster-asc', 'roster-desc', 'updated'];
+        const currentIndex = orders.indexOf(currentSortOrder);
+        const nextIndex = (currentIndex + 1) % orders.length;
+        currentSortOrder = orders[nextIndex];
+
+        const sortLabels = {
+            'roster-asc': '📋 名簿順（早い順）',
+            'roster-desc': '📋 名簿順（遅い順）',
+            'updated': '📋 更新順'
+        };
+        sortBtn.textContent = sortLabels[currentSortOrder];
+        
+        displayRecords(currentRecords);
     });
 
     sortOptions.forEach(option => {
@@ -98,18 +112,35 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (currentSortOrder === 'roster-asc') {
             sorted.sort((a, b) => {
-                const rosterA = a.student?.roster !== undefined && a.student?.roster !== null ? Number(a.student.roster) : Infinity;
-                const rosterB = b.student?.roster !== undefined && b.student?.roster !== null ? Number(b.student.roster) : Infinity;
-                return rosterA - rosterB;
+                const rosterA = a.student?.roster;
+                const rosterB = b.student?.roster;
+                
+                // nullの場合は一番下に
+                if (rosterA === null || rosterA === undefined) return 1;
+                if (rosterB === null || rosterB === undefined) return -1;
+                
+                return Number(rosterA) - Number(rosterB);
             });
         } else if (currentSortOrder === 'roster-desc') {
             sorted.sort((a, b) => {
-                const rosterA = a.student?.roster !== undefined && a.student?.roster !== null ? Number(a.student.roster) : -Infinity;
-                const rosterB = b.student?.roster !== undefined && b.student?.roster !== null ? Number(b.student.roster) : -Infinity;
-                return rosterB - rosterA;
+                const rosterA = a.student?.roster;
+                const rosterB = b.student?.roster;
+                
+                // nullの場合は一番下に
+                if (rosterA === null || rosterA === undefined) return 1;
+                if (rosterB === null || rosterB === undefined) return -1;
+                
+                return Number(rosterB) - Number(rosterA);
             });
         } else if (currentSortOrder === 'updated') {
             sorted.sort((a, b) => {
+                const rosterA = a.student?.roster;
+                const rosterB = b.student?.roster;
+                
+                // nullの場合は一番下に
+                if (rosterA === null || rosterA === undefined) return 1;
+                if (rosterB === null || rosterB === undefined) return -1;
+                
                 const dateA = new Date(a.record?.updated_at || 0);
                 const dateB = new Date(b.record?.updated_at || 0);
                 return dateB - dateA;
