@@ -36,12 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const classTitle = document.getElementById('classTitle');
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
-    const sortExecuteBtn = document.getElementById('sortExecuteBtn');
-    const sortTypeRadios = document.querySelectorAll('input[name="sortType"]');
 
     let currentStudents = [];
     let currentRecords = [];
-    let currentSortOrder = 'roster-asc';
+    let sortState = { column: 0, ascending: true }; // ソート状態を管理
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -57,8 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dateSelect.value = dateToKey(new Date());
 
     dateSelect.addEventListener('change', () => {
-        currentSortOrder = 'roster-asc';
-        document.querySelector('input[name="sortType"][value="roster-asc"]').checked = true;
+        sortState = { column: 0, ascending: true }; // ソート状態をリセット
         loadStudentsAndRecords(dateSelect.value);
     });
 
@@ -66,67 +63,60 @@ document.addEventListener('DOMContentLoaded', () => {
         await submitAllComments();
     });
 
-    sortTypeRadios.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            currentSortOrder = e.target.value;
+    // テーブルをソートする関数
+    const sortTable = (records, ascending) => {
+        const sorted = [...records].sort((a, b) => {
+            const aNum = a.student?.studentNumber !== null && a.student?.studentNumber !== undefined 
+                ? Number(a.student.studentNumber) 
+                : Infinity;
+            const bNum = b.student?.studentNumber !== null && b.student?.studentNumber !== undefined 
+                ? Number(b.student.studentNumber) 
+                : Infinity;
+            
+            return ascending ? aNum - bNum : bNum - aNum;
         });
-    });
+        return sorted;
+    };
 
-    sortExecuteBtn.addEventListener('click', () => {
-        if (!currentRecords || currentRecords.length === 0) {
-            alert('ソート対象の記録がありません。');
-            return;
-        }
-
-        const selectedSortType = document.querySelector('input[name="sortType"]:checked');
-        if (selectedSortType) {
-            currentSortOrder = selectedSortType.value;
-        }
-
-        displayRecords(currentRecords);
-        
-        setTimeout(() => {
-            alert('ソートが完了しました！');
-        }, 300);
-    });
-
-    // ソート関数：studentNumberに基づいてソート順を決定
-    const getSortOrderMap = (records) => {
-        const sortMap = new Map();
-
-        // studentNumberが存在する生徒と存在しない生徒を分ける
-        const studentsWithNumber = records.filter(item => 
-            item.student?.studentNumber !== null && item.student?.studentNumber !== undefined
-        );
-        const studentsWithoutNumber = records.filter(item => 
-            item.student?.studentNumber === null || item.student?.studentNumber === undefined
-        );
-
-        // studentNumberでソート
-        if (currentSortOrder === 'roster-asc') {
-            // 小さい順
-            studentsWithNumber.sort((a, b) => 
-                Number(a.student.studentNumber) - Number(b.student.studentNumber)
-            );
-        } else if (currentSortOrder === 'roster-desc') {
-            // 大きい順
-            studentsWithNumber.sort((a, b) => 
-                Number(b.student.studentNumber) - Number(a.student.studentNumber)
-            );
-        }
-
-        // ソート順を付与（1から始まる）
-        let order = 1;
-        studentsWithNumber.forEach(item => {
-            sortMap.set(item.student.id, order++);
+    // ソート矢印のリセット
+    const resetSortIndicators = () => {
+        const headers = document.querySelectorAll('.sort-header');
+        headers.forEach(header => {
+            header.classList.remove('sorted-asc', 'sorted-desc');
         });
+    };
 
-        // studentNumberがnullの場合は一番下
-        studentsWithoutNumber.forEach(item => {
-            sortMap.set(item.student.id, Infinity);
+    // ヘッダークリックイベント
+    const setupSortHeaders = () => {
+        const headers = document.querySelectorAll('.sort-header');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const isCurrentlySorted = header.classList.contains('sorted-asc') || 
+                                         header.classList.contains('sorted-desc');
+                
+                // ソート状態の切り替え
+                if (isCurrentlySorted && header.classList.contains('sorted-asc')) {
+                    sortState.ascending = false;
+                } else {
+                    sortState.ascending = true;
+                }
+
+                // 矢印をリセットして再表示
+                resetSortIndicators();
+                
+                // ソート実行
+                const sortedRecords = sortTable(currentRecords, sortState.ascending);
+                currentRecords = sortedRecords;
+                displayRecords(currentRecords);
+
+                // ソート矢印を表示
+                if (sortState.ascending) {
+                    header.classList.add('sorted-asc');
+                } else {
+                    header.classList.add('sorted-desc');
+                }
+            });
         });
-
-        return sortMap;
     };
 
     const loadStudentsAndRecords = async (date) => {
@@ -181,17 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // ソート順マップを取得
-        const sortMap = getSortOrderMap(records);
-
-        // sortMapに基づいてソート
-        const sortedRecords = [...records].sort((a, b) => {
-            const orderA = sortMap.get(a.student.id) ?? Infinity;
-            const orderB = sortMap.get(b.student.id) ?? Infinity;
-            return orderA - orderB;
-        });
-
-        const rows = sortedRecords.map(({ student, record }) => {
+        const rows = records.map(({ student, record }) => {
             const recordId = record?.id ?? null;
             const isCommentable = !!recordId;
 
@@ -245,6 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
 
         studentRecordsContainer.innerHTML = rows;
+        
+        // ソートヘッダーをセットアップ
+        setupSortHeaders();
     };
 
     const submitAllComments = async () => {
@@ -297,27 +280,4 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const updatedRecordItem = currentRecords.find(item => String(item.record?.id) === recordId);
-                if (updatedRecordItem?.record) {
-                    updatedRecordItem.record.teacher_comment = comment;
-                }
-
-                const savedCheckbox = document.getElementById(`checkbox-${recordId}`);
-                if (savedCheckbox) {
-                    savedCheckbox.checked = true;
-                }
-
-                successCount++;
-            } catch (error) {
-                console.error(`Record ID ${recordId} のコメント保存に失敗:`, error);
-                failCount++;
-            }
-        }
-
-        submitAllCommentsBtn.disabled = false;
-        submitAllCommentsBtn.textContent = `全件保存 (${successCount}件成功, ${failCount}件失敗)`;
-
-        setTimeout(() => {
-            submitAllCommentsBtn.textContent = 'コメントを一括保存';
-        }, 3000);
-    };
-});
+                if

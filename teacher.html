@@ -24,24 +24,14 @@
 
             <div class="header-actions">
                 <span id="recordCount"></span>
-                <div class="sort-controls">
-                    <label class="sort-option-label">
-                        <input type="radio" name="sortType" value="roster-asc" checked> 名簿順（早い順）
-                    </label>
-                    <label class="sort-option-label">
-                        <input type="radio" name="sortType" value="roster-desc"> 名簿順（遅い順）
-                    </label>
-                    <label class="sort-option-label">
-                        <input type="radio" name="sortType" value="updated"> 更新順
-                    </label>
-                    <button class="sort-execute-btn" id="sortExecuteBtn">🔄 ソート開始</button>
-                </div>
                 <button class="submit-btn" id="submitAllCommentsBtn">✅ チェック済みを保存</button>
             </div>
 
             <div class="record-table-wrapper">
                 <div class="record-table-header">
-                    <div class="header-cell col-student-list">生徒名</div>
+                    <div class="header-cell col-student-list sort-header" data-sort-col="0">
+                        生徒名 <span class="sort-arrow"></span>
+                    </div>
                     <div class="header-cell col-study-record">学習時間</div>
                     <div class="header-cell col-student-comment">生徒コメント</div>
                     <div class="header-cell col-teacher-comment">教師コメント</div>
