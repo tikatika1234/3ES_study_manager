@@ -36,9 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const classTitle = document.getElementById('classTitle');
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
+    const studentNameHeader = document.getElementById('studentNameHeader');
 
     let currentStudents = [];
     let currentRecords = [];
+    let sortOrder = 'asc'; // 'asc' or 'desc'
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -51,6 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ソートヘッダーのクリックイベント
+    if (studentNameHeader) {
+        studentNameHeader.addEventListener('click', () => {
+            sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            sortRecords();
+            updateSortIndicator();
+        });
+    }
+
     dateSelect.value = dateToKey(new Date());
 
     dateSelect.addEventListener('change', () => {
@@ -60,6 +71,48 @@ document.addEventListener('DOMContentLoaded', () => {
     submitAllCommentsBtn.addEventListener('click', async () => {
         await submitAllComments();
     });
+
+    // ソートインジケーターの更新
+    const updateSortIndicator = () => {
+        const indicator = studentNameHeader.querySelector('.sort-indicator');
+        if (indicator) {
+            indicator.textContent = sortOrder === 'asc' ? '▲' : '▼';
+        }
+    };
+
+    // レコードをソート
+    const sortRecords = () => {
+        currentRecords.sort((a, b) => {
+            const rosterA = a.student?.roster;
+            const rosterB = b.student?.roster;
+            
+            // roster が存在しない場合は最後に配置
+            if (rosterA === undefined || rosterA === null || rosterA === '') {
+                return 1;
+            }
+            if (rosterB === undefined || rosterB === null || rosterB === '') {
+                return -1;
+            }
+            
+            // 数値として比較
+            const numA = Number(rosterA);
+            const numB = Number(rosterB);
+            
+            // 数値に変換できない場合は文字列として比較
+            if (isNaN(numA) || isNaN(numB)) {
+                const strA = String(rosterA);
+                const strB = String(rosterB);
+                return sortOrder === 'asc' 
+                    ? strA.localeCompare(strB)
+                    : strB.localeCompare(strA);
+            }
+            
+            // 数値として比較
+            return sortOrder === 'asc' ? numA - numB : numB - numA;
+        });
+        
+        displayRecords(currentRecords);
+    };
 
     const loadStudentsAndRecords = async (date) => {
         studentRecordsContainer.innerHTML = '<p style="grid-column: 1 / -1; padding: 20px; text-align: center;">読み込み中...</p>';
@@ -99,7 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentRecords.push({ student, record: targetRecord });
             }
 
-            displayRecords(currentRecords);
+            // 初期表示は名簿順（昇順）
+            sortOrder = 'asc';
+            sortRecords();
+            updateSortIndicator();
         } catch (error) {
             console.error('エラー:', error);
             studentRecordsContainer.innerHTML = `<p style="grid-column: 1 / -1; padding: 20px; text-align: center; color: red;">エラー: ${error.message}</p>`;

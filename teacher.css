@@ -157,6 +157,27 @@ main {
     border-right: none;
 }
 
+/* ソート可能なヘッダー */
+.header-cell.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.header-cell.sortable:hover {
+    background-color: #1f8737;
+}
+
+.header-cell.sortable:active {
+    background-color: #1a6f2e;
+}
+
+.sort-indicator {
+    margin-left: 6px;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
 .record-table-body {
     display: grid;
     grid-template-columns: 1.2fr 2fr 1.8fr 2.2fr 0.6fr;
