@@ -280,4 +280,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const updatedRecordItem = currentRecords.find(item => String(item.record?.id) === recordId);
-                if
+                                if (updatedRecordItem && updatedRecordItem.record) {
+                                    updatedRecordItem.record.teacher_comment = comment;
+                                }
+                            } catch (error) {
+                                failCount++;
+                                console.error('コメント保存失敗:', error);
+                            } finally {
+                                successCount++;
+                            }
+                        }
+                
+                        submitAllCommentsBtn.disabled = false;
+                        submitAllCommentsBtn.textContent = 'すべてのコメントを保存';
+                
+                        alert(`保存完了: ${successCount}件, 失敗: ${failCount}件`);
+                        displayRecords(currentRecords);
+                    };
+                
+                    // 初期ロード
+                    loadStudentsAndRecords(dateSelect.value);
+                });
