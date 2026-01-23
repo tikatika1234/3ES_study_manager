@@ -96,26 +96,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const sorted = [...records];
         
         const compareFunc = (a, b) => {
-            const rosterA = a.student?.roster;
-            const rosterB = b.student?.roster;
+            const studentNumA = a.student?.studentNumber;
+            const studentNumB = b.student?.studentNumber;
             
-            const isNullA = rosterA === null || rosterA === undefined;
-            const isNullB = rosterB === null || rosterB === undefined;
+            const isNullA = studentNumA === null || studentNumA === undefined;
+            const isNullB = studentNumB === null || studentNumB === undefined;
             
             if (isNullA && isNullB) return 0;
             if (isNullA) return 1;
             if (isNullB) return -1;
             
-            const numA = Number(rosterA);
-            const numB = Number(rosterB);
+            const numA = Number(studentNumA);
+            const numB = Number(studentNumB);
             
             if (currentSortOrder === 'roster-asc') {
+                // studentNumberが小さい順
                 return numA - numB;
             } else if (currentSortOrder === 'roster-desc') {
+                // studentNumberが大きい順
                 return numB - numA;
             } else if (currentSortOrder === 'updated') {
-                const dateA = new Date(a.record?.updated_at || 0).getTime();
-                const dateB = new Date(b.record?.updated_at || 0).getTime();
+                // その日のrecordの日付が最新順（新しい順）
+                const dateA = a.record ? new Date(a.record.updated_at || a.record.created_at || 0).getTime() : 0;
+                const dateB = b.record ? new Date(b.record.updated_at || b.record.created_at || 0).getTime() : 0;
                 return dateB - dateA;
             }
             
