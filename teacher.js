@@ -36,9 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const classTitle = document.getElementById('classTitle');
     const submitAllCommentsBtn = document.getElementById('submitAllCommentsBtn');
     const recordCountElement = document.getElementById('recordCount');
+    const sortBtn = document.getElementById('sortBtn');
 
     let currentStudents = [];
     let currentRecords = [];
+    let currentSortOrder = 'roster-asc'; // 'roster-asc' | 'roster-desc' | 'updated'
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -60,6 +62,51 @@ document.addEventListener('DOMContentLoaded', () => {
     submitAllCommentsBtn.addEventListener('click', async () => {
         await submitAllComments();
     });
+
+    sortBtn.addEventListener('click', () => {
+        cycleSortOrder();
+        displayRecords(currentRecords);
+    });
+
+    const cycleSortOrder = () => {
+        const orders = ['roster-asc', 'roster-desc', 'updated'];
+        const currentIndex = orders.indexOf(currentSortOrder);
+        const nextIndex = (currentIndex + 1) % orders.length;
+        currentSortOrder = orders[nextIndex];
+
+        const sortLabels = {
+            'roster-asc': '📋 名簿順（早い順）',
+            'roster-desc': '📋 名簿順（遅い順）',
+            'updated': '📋 更新順'
+        };
+        sortBtn.textContent = sortLabels[currentSortOrder];
+    };
+
+    const sortRecords = (records) => {
+        const sorted = [...records];
+        
+        if (currentSortOrder === 'roster-asc') {
+            sorted.sort((a, b) => {
+                const rosterA = a.student?.roster ?? Infinity;
+                const rosterB = b.student?.roster ?? Infinity;
+                return rosterA - rosterB;
+            });
+        } else if (currentSortOrder === 'roster-desc') {
+            sorted.sort((a, b) => {
+                const rosterA = a.student?.roster ?? -Infinity;
+                const rosterB = b.student?.roster ?? -Infinity;
+                return rosterB - rosterA;
+            });
+        } else if (currentSortOrder === 'updated') {
+            sorted.sort((a, b) => {
+                const dateA = new Date(a.record?.updated_at || 0);
+                const dateB = new Date(b.record?.updated_at || 0);
+                return dateB - dateA;
+            });
+        }
+        
+        return sorted;
+    };
 
     const loadStudentsAndRecords = async (date) => {
         studentRecordsContainer.innerHTML = '<p style="grid-column: 1 / -1; padding: 20px; text-align: center;">読み込み中...</p>';
@@ -113,7 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const rows = records.map(({ student, record }) => {
+        const sortedRecords = sortRecords(records);
+
+        const rows = sortedRecords.map(({ student, record }) => {
             const recordId = record?.id ?? null;
             const isCommentable = !!recordId;
 
