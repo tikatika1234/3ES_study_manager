@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentStudents = [];
     let currentRecords = [];
-    let sortState = { column: 0, ascending: true }; // ソート状態を管理
+    let sortState = { column: 0, ascending: true };
 
     userNameElement.textContent = userData.displayName || '先生';
     classTitle.textContent = `${userData.displayName || '先生'}の担当生徒の記録`;
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dateSelect.value = dateToKey(new Date());
 
     dateSelect.addEventListener('change', () => {
-        sortState = { column: 0, ascending: true }; // ソート状態をリセット
+        sortState = { column: 0, ascending: true };
         loadStudentsAndRecords(dateSelect.value);
     });
 
@@ -90,26 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const setupSortHeaders = () => {
         const headers = document.querySelectorAll('.sort-header');
         headers.forEach(header => {
+            header.removeEventListener('click', null);
             header.addEventListener('click', () => {
                 const isCurrentlySorted = header.classList.contains('sorted-asc') || 
                                          header.classList.contains('sorted-desc');
                 
-                // ソート状態の切り替え
                 if (isCurrentlySorted && header.classList.contains('sorted-asc')) {
                     sortState.ascending = false;
                 } else {
                     sortState.ascending = true;
                 }
 
-                // 矢印をリセットして再表示
                 resetSortIndicators();
                 
-                // ソート実行
                 const sortedRecords = sortTable(currentRecords, sortState.ascending);
                 currentRecords = sortedRecords;
                 displayRecords(currentRecords);
 
-                // ソート矢印を表示
                 if (sortState.ascending) {
                     header.classList.add('sorted-asc');
                 } else {
@@ -196,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const teacherComment = record?.teacher_comment || '';
             const recIdStr = isCommentable ? String(recordId) : '';
 
-            // 名簿番号表示を追加（生徒名の右）
             const rosterDisplay = student?.roster !== undefined && student?.roster !== null && student?.roster !== '' ? ` <span class="roster">(#${escapeHtml(String(student.roster))})</span>` : '';
 
             return `
@@ -225,8 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
 
         studentRecordsContainer.innerHTML = rows;
-        
-        // ソートヘッダーをセットアップ
         setupSortHeaders();
     };
 
@@ -280,24 +274,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const updatedRecordItem = currentRecords.find(item => String(item.record?.id) === recordId);
-                                if (updatedRecordItem && updatedRecordItem.record) {
-                                    updatedRecordItem.record.teacher_comment = comment;
-                                }
-                            } catch (error) {
-                                failCount++;
-                                console.error('コメント保存失敗:', error);
-                            } finally {
-                                successCount++;
-                            }
-                        }
-                
-                        submitAllCommentsBtn.disabled = false;
-                        submitAllCommentsBtn.textContent = 'すべてのコメントを保存';
-                
-                        alert(`保存完了: ${successCount}件, 失敗: ${failCount}件`);
-                        displayRecords(currentRecords);
-                    };
-                
-                    // 初期ロード
-                    loadStudentsAndRecords(dateSelect.value);
-                });
+                if (updatedRecordItem && updatedRecordItem.record) {
+                    updatedRecordItem.record.teacher_comment = comment;
+                }
+
+                successCount++;
+            } catch (error) {
+                console.error(`Record ID ${recordId} のコメント保存に失敗:`, error);
+                failCount++;
+            }
+        }
+
+        submitAllCommentsBtn.disabled = false;
+        submitAllCommentsBtn.textContent = 'チェック済みを保存';
+
+        alert(`保存完了: ${successCount}件成功, ${failCount}件失敗`);
+        displayRecords(currentRecords);
+    };
+
+    // 初期ロード
+    loadStudentsAndRecords(dateSelect.value);
+});
