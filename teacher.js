@@ -90,43 +90,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     });
 
-    const sortRecords = (records) => {
-        if (!records || records.length === 0) return records;
-        
-        const sorted = [...records];
-        
-        const compareFunc = (a, b) => {
-            const studentNumA = a.student?.studentNumber;
-            const studentNumB = b.student?.studentNumber;
-            
-            const isNullA = studentNumA === null || studentNumA === undefined;
-            const isNullB = studentNumB === null || studentNumB === undefined;
-            
-            if (isNullA && isNullB) return 0;
-            if (isNullA) return 1;
-            if (isNullB) return -1;
-            
-            const numA = Number(studentNumA);
-            const numB = Number(studentNumB);
-            
-            if (currentSortOrder === 'roster-asc') {
-                // studentNumberが小さい順
-                return numA - numB;
-            } else if (currentSortOrder === 'roster-desc') {
-                // studentNumberが大きい順
-                return numB - numA;
-            } else if (currentSortOrder === 'updated') {
-                // その日のrecordの日付が最新順（新しい順）
-                const dateA = a.record ? new Date(a.record.updated_at || a.record.created_at || 0).getTime() : 0;
-                const dateB = b.record ? new Date(b.record.updated_at || b.record.created_at || 0).getTime() : 0;
-                return dateB - dateA;
-            }
-            
-            return 0;
-        };
-        
-        sorted.sort(compareFunc);
-        return sorted;
+    // ソート関数：studentNumberに基づいてソート順を決定
+    const getSortOrderMap = (records) => {
+        const sortMap = new Map();
+
+        // studentNumberが存在する生徒と存在しない生徒を分ける
+        const studentsWithNumber = records.filter(item => 
+            item.student?.studentNumber !== null && item.student?.studentNumber !== undefined
+        );
+        const studentsWithoutNumber = records.filter(item => 
+            item.student?.studentNumber === null || item.student?.studentNumber === undefined
+        );
+
+        // studentNumberでソート
+        if (currentSortOrder === 'roster-asc') {
+            // 小さい順
+            studentsWithNumber.sort((a, b) => 
+                Number(a.student.studentNumber) - Number(b.student.studentNumber)
+            );
+        } else if (currentSortOrder === 'roster-desc') {
+            // 大きい順
+            studentsWithNumber.sort((a, b) => 
+                Number(b.student.studentNumber) - Number(a.student.studentNumber)
+            );
+        }
+
+        // ソート順を付与（1から始まる）
+        let order = 1;
+        studentsWithNumber.forEach(item => {
+            sortMap.set(item.student.id, order++);
+        });
+
+        // studentNumberがnullの場合は一番下
+        studentsWithoutNumber.forEach(item => {
+            sortMap.set(item.student.id, Infinity);
+        });
+
+        return sortMap;
     };
 
     const loadStudentsAndRecords = async (date) => {
@@ -181,7 +181,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const sortedRecords = sortRecords(records);
+        // ソート順マップを取得
+        const sortMap = getSortOrderMap(records);
+
+        // sortMapに基づいてソート
+        const sortedRecords = [...records].sort((a, b) => {
+            const orderA = sortMap.get(a.student.id) ?? Infinity;
+            const orderB = sortMap.get(b.student.id) ?? Infinity;
+            return orderA - orderB;
+        });
 
         const rows = sortedRecords.map(({ student, record }) => {
             const recordId = record?.id ?? null;
